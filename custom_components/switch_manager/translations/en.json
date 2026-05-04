@@ -1,0 +1,113 @@
+{
+  "title": "Switch Manager",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Switch Manager",
+        "description": "Configure the shared global references used by controllers.",
+        "data": {
+          "smart_mode_entity": "Smart mode active",
+          "night_mode_entity": "Night mode active",
+          "alarm_entity": "Alarm",
+          "alarm_timer_entity": "Alarm retardation",
+          "alarm_notification_script_entity": "Alarm notification script"
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Only one Switch Manager configuration entry is supported."
+    }
+  },
+  "issues": {
+    "configured_entity_unavailable": {
+      "title": "Configured entity is unavailable",
+      "description": "The configured entity `{entity_id}` for controller `{controller_name}` field `{field_name}` is unavailable. Switch Manager will use fallback behavior when possible until the entity becomes available again."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Switch Manager",
+        "description": "Choose what you want to configure.",
+        "menu_options": {
+          "global_settings": "Edit global settings",
+          "add_controller": "Add switch/light controller",
+          "select_controller": "Manage existing controller"
+        }
+      },
+      "global_settings": {
+        "title": "Edit global settings",
+        "description": "Update the shared global references used by all controllers.",
+        "data": {
+          "smart_mode_entity": "Smart mode active",
+          "night_mode_entity": "Night mode active",
+          "alarm_entity": "Alarm",
+          "alarm_timer_entity": "Alarm retardation",
+          "alarm_notification_script_entity": "Alarm notification script"
+        }
+      },
+      "add_controller": {
+        "title": "Add switch/light controller",
+        "description": "Create a controller with required and optional runtime fields.",
+        "data": {
+          "enabled": "Enabled",
+          "main_entity": "Main switch/light",
+          "night_entity": "Night switch/light",
+          "activate_on_detection": "Turn on when motion/presence is detected",
+          "detector_sensor_1": "Motion/Presence detector 1",
+          "detector_sensor_2": "Motion/Presence detector 2",
+          "illuminance_threshold_entity": "Turn on if illuminance is below",
+          "illuminance_sensor": "Illuminance sensor",
+          "turn_off_when_presence_clears": "Turn off when detector clears",
+          "wait_time": "Turn off delay (in seconds)",
+          "notify_with_alarm": "Notify when turn on and alarm is actived",
+          "turn_off_entity_1": "On turn on, turn off the switch/light 1",
+          "turn_off_entity_2": "On turn on, turn off the switch/light 2"
+        }
+      },
+      "select_controller": {
+        "title": "Select controller",
+        "description": "Choose the controller you want to modify.",
+        "data": {
+          "controller_id": "Controller"
+        }
+      },
+      "controller_actions": {
+        "title": "Controller actions",
+        "description": "Choose what you want to do with the selected controller.",
+        "menu_options": {
+          "edit_controller": "Edit controller",
+          "delete_controller": "Delete controller"
+        }
+      },
+      "edit_controller": {
+        "title": "Edit controller",
+        "description": "Update the selected controller.",
+        "data": {
+          "enabled": "Enabled",
+          "main_entity": "Main switch/light",
+          "night_entity": "Night switch/light",
+          "activate_on_detection": "Turn on when motion/presence is detected",
+          "detector_sensor_1": "Motion/Presence detector 1",
+          "detector_sensor_2": "Motion/Presence detector 2",
+          "illuminance_threshold_entity": "Turn on if illuminance is below",
+          "illuminance_sensor": "Illuminance sensor",
+          "wait_time": "Turn off delay (in seconds)",
+          "turn_off_when_presence_clears": "Turn off when detector clears",
+          "notify_with_alarm": "Notify when turn on and alarm is actived",
+          "turn_off_entity_1": "On turn on, turn off 1",
+          "turn_off_entity_2": "On turn on, turn off 2"
+        }
+      },
+      "delete_controller": {
+        "title": "Delete controller",
+        "description": "Submit to delete the selected controller. This cannot be undone."
+      }
+    },
+    "abort": {
+      "no_controllers": "There are no controllers to manage.",
+      "controller_not_found": "The selected controller could not be found."
+    },
+    "flow_title": "Switch Manager"
+  }
+}

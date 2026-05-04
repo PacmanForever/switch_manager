@@ -1,0 +1,41 @@
+# Release Checklist
+
+## Repository Identity
+
+Release-facing GitHub metadata has been updated for `PacmanForever/switch_manager`.
+
+Before publishing broadly, do one last pass to confirm no placeholder values remain in non-release-facing internal docs.
+
+## Release Metadata
+
+1. Confirm the manifest version in [custom_components/switch_manager/manifest.json](custom_components/switch_manager/manifest.json) matches the release tag.
+2. Update [CHANGELOG.md](CHANGELOG.md) with release-facing notes.
+3. Verify [hacs.json](hacs.json) still matches the minimum supported Home Assistant version.
+
+## Validation
+
+Run locally:
+
+```bash
+/home/pacman/Projectes/switch_manager/.venv/bin/python -m compileall custom_components tests
+/home/pacman/Projectes/switch_manager/.venv/bin/python -m pytest tests/unit/test_models.py tests/unit/test_storage_migrations.py tests/component/test_services.py tests/component/test_issues.py tests/component/test_config_flow.py tests/component/test_controller_runtime.py tests/component/test_alarm_notifications.py tests/component/test_illuminance_behavior.py tests/component/test_delayed_shutoff.py -q
+```
+
+Then confirm GitHub Actions passes:
+
+- [.github/workflows/tests.yml](.github/workflows/tests.yml)
+- [.github/workflows/validate_hacs.yml](.github/workflows/validate_hacs.yml)
+- [.github/workflows/validate_hassfest.yml](.github/workflows/validate_hassfest.yml)
+
+## Publication Readiness
+
+1. Ensure [LICENSE](LICENSE), [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [QUALITY.md](QUALITY.md) are up to date.
+2. Confirm [custom_components/switch_manager/services.yaml](custom_components/switch_manager/services.yaml) reflects the actual service surface.
+3. Confirm [PLAN.md](PLAN.md) still matches the implemented architecture and deferred scope.
+4. Decide whether to keep or remove development-only folders from version control expectations, such as `.vscode`.
+
+## Final Manual Checks
+
+1. Review Repairs strings and user-facing wording in [custom_components/switch_manager/strings.json](custom_components/switch_manager/strings.json).
+2. Verify placeholders are gone from release-facing files.
+3. Tag the release only after the manifest and changelog are aligned.

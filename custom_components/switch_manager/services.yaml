@@ -1,0 +1,59 @@
+enable_controller:
+  name: Enable controller
+  description: Enable one configured controller and reload the runtime manager.
+  fields:
+    id:
+      name: Controller ID
+      description: Stable internal controller identifier.
+      required: true
+      example: hallway
+      selector:
+        text:
+
+disable_controller:
+  name: Disable controller
+  description: Disable one configured controller and reload the runtime manager.
+  fields:
+    id:
+      name: Controller ID
+      description: Stable internal controller identifier.
+      required: true
+      example: hallway
+      selector:
+        text:
+
+reset_controller_timer:
+  name: Reset controller timer
+  description: Restart the active safety timer for a running controller.
+  fields:
+    id:
+      name: Controller ID
+      description: Stable internal controller identifier.
+      required: true
+      example: hallway
+      selector:
+        text:
+
+force_turn_on:
+  name: Force turn on
+  description: Force the controller target on using the standard activation fallback path.
+  fields:
+    id:
+      name: Controller ID
+      description: Stable internal controller identifier.
+      required: true
+      example: hallway
+      selector:
+        text:
+
+force_turn_off:
+  name: Force turn off
+  description: Force the controller target off and cancel any active timer.
+  fields:
+    id:
+      name: Controller ID
+      description: Stable internal controller identifier.
+      required: true
+      example: hallway
+      selector:
+        text:
