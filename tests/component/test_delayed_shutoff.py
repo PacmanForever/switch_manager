@@ -70,16 +70,93 @@ async def test_timer_expiry_restarts_when_detector_stays_on(hass, monkeypatch) -
 
     runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
     runtime._async_turn_off_controlled_entities = AsyncMock()
-    runtime._async_restart_timer = AsyncMock()
+    runtime._async_all_detectors_are_clear = AsyncMock(side_effect=[False, True])
+
+    sleep_calls = 0
+
+    async def immediate_sleep(_seconds: int) -> None:
+        nonlocal sleep_calls
+        sleep_calls += 1
+        if sleep_calls > 2:
+            raise AssertionError("timer worker looped more than expected")
+        return None
+
+    runtime._timer_task = object()
+
+    with monkeypatch.context() as context:
+        context.setattr(
+            "custom_components.switch_manager.controller.asyncio.sleep",
+            immediate_sleep,
+        )
+        await runtime._async_timer_worker()
+
+    assert sleep_calls == 2
+    assert runtime._async_all_detectors_are_clear.await_count == 2
+    runtime._async_turn_off_controlled_entities.assert_awaited_once()
+    assert runtime._timer_task is None
+
+
+@pytest.mark.asyncio
+async def test_timer_expiry_turns_off_when_detector_is_clear(hass, monkeypatch) -> None:
+    """A cleared detector should allow shutoff on the next timer expiry."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "detector_sensor_1": "binary_sensor.hallway_presence",
+            "wait_time": 60,
+        }
+    )
+    hass.states.async_set("light.hallway", "on")
+    hass.states.async_set("binary_sensor.hallway_presence", "off", {"device_class": "presence"})
+
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._async_turn_off_entity = AsyncMock()
 
     async def immediate_sleep(_seconds: int) -> None:
         return None
 
-    monkeypatch.setattr("custom_components.switch_manager.controller.asyncio.sleep", immediate_sleep)
     runtime._timer_task = object()
 
-    await runtime._async_timer_worker()
+    with monkeypatch.context() as context:
+        context.setattr(
+            "custom_components.switch_manager.controller.asyncio.sleep",
+            immediate_sleep,
+        )
+        await runtime._async_timer_worker()
 
-    runtime._async_restart_timer.assert_awaited_once()
-    runtime._async_turn_off_controlled_entities.assert_not_awaited()
+    runtime._async_turn_off_entity.assert_awaited_once_with("light.hallway")
+    assert runtime._timer_task is None
+
+
+@pytest.mark.asyncio
+async def test_timer_expiry_turns_off_without_detectors(hass, monkeypatch) -> None:
+    """Controllers without detectors should still respect the turn-off delay."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "wait_time": 60,
+        }
+    )
+    hass.states.async_set("light.hallway", "on")
+
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._async_turn_off_entity = AsyncMock()
+
+    async def immediate_sleep(_seconds: int) -> None:
+        return None
+
+    runtime._timer_task = object()
+
+    with monkeypatch.context() as context:
+        context.setattr(
+            "custom_components.switch_manager.controller.asyncio.sleep",
+            immediate_sleep,
+        )
+        await runtime._async_timer_worker()
+
+    runtime._async_turn_off_entity.assert_awaited_once_with("light.hallway")
     assert runtime._timer_task is None

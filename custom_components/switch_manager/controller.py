@@ -88,6 +88,9 @@ class ControllerRuntime:
                 )
             )
 
+        if await self._async_any_controlled_entity_on():
+            await self._async_restart_timer()
+
     async def async_stop(self) -> None:
         """Stop runtime handling for this controller."""
         await self._async_cancel_timer()
@@ -374,15 +377,28 @@ class ControllerRuntime:
     async def _async_timer_worker(self) -> None:
         """Wait for the controller timeout and then shut down controlled entities."""
         try:
-            await asyncio.sleep(self.controller.wait_time)
-            if not await self._async_all_detectors_are_clear():
-                await self._async_restart_timer()
-                return
-            await self._async_turn_off_controlled_entities()
+            while True:
+                await asyncio.sleep(self.controller.wait_time)
+                if await self._async_all_detectors_are_clear():
+                    await self._async_turn_off_controlled_entities()
+                    return
         except asyncio.CancelledError:
             raise
         finally:
             self._timer_task = None
+
+    async def _async_any_controlled_entity_on(self) -> bool:
+        """Return whether the main or night entity is currently on."""
+        return self._is_entity_on_silently(self.controller.main_entity) or self._is_entity_on_silently(
+            self.controller.night_entity
+        )
+
+    def _is_entity_on_silently(self, entity_id: str | None) -> bool:
+        """Return whether an entity is on without creating availability issues."""
+        if entity_id is None:
+            return False
+        state = self.hass.states.get(entity_id)
+        return state is not None and state.state == STATE_ON
 
     async def _async_turn_off_controlled_entities(self) -> None:
         """Turn off the main and night entities if they are on."""
@@ -478,7 +494,7 @@ class ControllerRuntime:
             if entity_id is not None
         ]
         if not detector_ids:
-            return False
+            return True
 
         for entity_id in detector_ids:
             field_name = (

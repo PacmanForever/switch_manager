@@ -73,7 +73,6 @@ async def test_controller_subentry_flow_reconfigures_existing_controller(hass) -
     flow.handler = ("entry-1", SUBENTRY_TYPE_CONTROLLER)
     flow.context = {"source": "reconfigure", "subentry_id": "sub-1"}
     hass.config_entries.async_update_subentry = Mock(return_value=True)
-    entry = SimpleNamespace()
     subentry = ConfigSubentry(
         data=MappingProxyType(
             {
@@ -90,6 +89,7 @@ async def test_controller_subentry_flow_reconfigures_existing_controller(hass) -
         title="Hallway",
         unique_id="hallway",
     )
+    entry = SimpleNamespace(subentries={"sub-1": subentry})
 
     with patch.object(flow, "_get_entry", return_value=entry), patch.object(
         flow, "_get_reconfigure_subentry", return_value=subentry
@@ -109,3 +109,48 @@ async def test_controller_subentry_flow_reconfigures_existing_controller(hass) -
     assert result["reason"] == "reconfigure_successful"
     hass.config_entries.async_update_subentry.assert_called_once()
     assert hass.config_entries.async_update_subentry.call_args.kwargs["title"] == "Kitchen"
+
+
+@pytest.mark.asyncio
+async def test_controller_subentry_flow_rejects_duplicate_main_entity(hass) -> None:
+    """The controller subentry flow should reject duplicate main entities."""
+    flow = SwitchManagerControllerSubentryFlow()
+    flow.hass = hass
+    flow.handler = ("entry-1", SUBENTRY_TYPE_CONTROLLER)
+    flow.context = {"source": "user"}
+
+    existing_subentry = ConfigSubentry(
+        data=MappingProxyType(
+            {
+                "main_entity": "light.hallway",
+                "wait_time": 120,
+                "enabled": True,
+                "activate_on_detection": True,
+                "turn_off_when_presence_clears": False,
+                "notify_with_alarm": False,
+            }
+        ),
+        subentry_id="sub-1",
+        subentry_type=SUBENTRY_TYPE_CONTROLLER,
+        title="Hallway",
+        unique_id="hallway",
+    )
+
+    with patch.object(
+        flow,
+        "_get_entry",
+        return_value=SimpleNamespace(subentries={"sub-1": existing_subentry}),
+    ):
+        result = await flow.async_step_user(
+            {
+                "main_entity": "light.hallway",
+                "wait_time": 120,
+                "enabled": True,
+                "activate_on_detection": True,
+                "turn_off_when_presence_clears": False,
+                "notify_with_alarm": False,
+            }
+        )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "main_entity_already_configured"}

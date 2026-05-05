@@ -16,6 +16,7 @@ from .const import (
     CONF_ALARM_ENTITY,
     CONF_ALARM_NOTIFICATION_SCRIPT_ENTITY,
     CONF_ALARM_TIMER_ENTITY,
+    CONF_CONTROLLER_ID,
     CONF_DETECTOR_SENSOR_1,
     CONF_DETECTOR_SENSOR_2,
     CONF_ENABLED,
@@ -244,6 +245,39 @@ def _build_controller_id(name: str, existing_ids: set[str]) -> str:
     return controller_id
 
 
+def _main_entity_in_use(
+    entry: config_entries.ConfigEntry,
+    main_entity: str,
+    *,
+    ignore_subentry_id: str | None = None,
+) -> bool:
+    """Return whether another controller subentry already uses this main entity."""
+    for subentry in entry.subentries.values():
+        if subentry.subentry_type != SUBENTRY_TYPE_CONTROLLER:
+            continue
+        if ignore_subentry_id is not None and subentry.subentry_id == ignore_subentry_id:
+            continue
+        if subentry.data.get(CONF_MAIN_ENTITY) == main_entity:
+            return True
+    return False
+
+
+def _controller_schema_defaults(
+    submitted: dict[str, Any] | None,
+    *,
+    unique_id: str,
+    title: str,
+) -> dict[str, Any] | None:
+    """Build schema defaults for controller forms from partial flow input."""
+    if submitted is None:
+        return None
+    return {
+        **submitted,
+        CONF_CONTROLLER_ID: submitted.get(CONF_CONTROLLER_ID, unique_id),
+        "name": submitted.get("name", title),
+    }
+
+
 class SwitchManagerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle the initial setup flow for Switch Manager."""
 
@@ -318,27 +352,41 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
     ) -> config_entries.SubentryFlowResult:
         """Create a controller subentry."""
         entry = self._get_entry()
+        errors: dict[str, str] = {}
 
         if user_input is not None:
-            controller_name = _derive_controller_name(
-                self.hass,
-                user_input[CONF_MAIN_ENTITY],
-            )
-            existing_ids = {
-                subentry.unique_id
-                for subentry in entry.subentries.values()
-                if subentry.subentry_type == SUBENTRY_TYPE_CONTROLLER
-                and subentry.unique_id is not None
-            }
-            return self.async_create_entry(
-                title=controller_name,
-                data=user_input,
-                unique_id=_build_controller_id(controller_name, existing_ids),
-            )
+            if _main_entity_in_use(entry, user_input[CONF_MAIN_ENTITY]):
+                errors["base"] = "main_entity_already_configured"
+            else:
+                controller_name = _derive_controller_name(
+                    self.hass,
+                    user_input[CONF_MAIN_ENTITY],
+                )
+                existing_ids = {
+                    subentry.unique_id
+                    for subentry in entry.subentries.values()
+                    if subentry.subentry_type == SUBENTRY_TYPE_CONTROLLER
+                    and subentry.unique_id is not None
+                }
+                return self.async_create_entry(
+                    title=controller_name,
+                    data=user_input,
+                    unique_id=_build_controller_id(controller_name, existing_ids),
+                )
 
         return self.async_show_form(
             step_id="user",
-            data_schema=_build_controller_schema(),
+            data_schema=_build_controller_schema(
+                _controller_schema_defaults(
+                    user_input,
+                    unique_id="new_controller",
+                    title=_derive_controller_name(
+                        self.hass,
+                        (user_input or {}).get(CONF_MAIN_ENTITY, ""),
+                    ),
+                )
+            ),
+            errors=errors,
         )
 
     async def async_step_reconfigure(
@@ -347,27 +395,41 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
         """Reconfigure an existing controller subentry."""
         entry = self._get_entry()
         subentry = self._get_reconfigure_subentry()
+        errors: dict[str, str] = {}
 
         if user_input is not None:
-            controller_name = _derive_controller_name(
-                self.hass,
-                user_input[CONF_MAIN_ENTITY],
-                fallback=subentry.title,
-            )
-            return self.async_update_and_abort(
+            if _main_entity_in_use(
                 entry,
-                subentry,
-                title=controller_name,
-                data=user_input,
-            )
+                user_input[CONF_MAIN_ENTITY],
+                ignore_subentry_id=subentry.subentry_id,
+            ):
+                errors["base"] = "main_entity_already_configured"
+            else:
+                controller_name = _derive_controller_name(
+                    self.hass,
+                    user_input[CONF_MAIN_ENTITY],
+                    fallback=subentry.title,
+                )
+                return self.async_update_and_abort(
+                    entry,
+                    subentry,
+                    title=controller_name,
+                    data=user_input,
+                )
 
         return self.async_show_form(
             step_id="reconfigure",
             data_schema=_build_controller_schema(
-                {
+                _controller_schema_defaults(
+                    user_input,
+                    unique_id=subentry.unique_id or "controller",
+                    title=subentry.title,
+                )
+                or {
                     **dict(subentry.data),
-                    "id": subentry.unique_id,
+                    CONF_CONTROLLER_ID: subentry.unique_id,
                     "name": subentry.title,
                 }
             ),
+            errors=errors,
         )

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.5
+
+- Blocked creating or reconfiguring multiple controllers that use the same main switch/light.
+- Fixed delayed shutoff so controllers without detectors still turn off after the configured delay and active detectors keep extending the timer until they clear.
+- Resumed the shutdown timer when a controlled light is already on during runtime startup.
+- Avoided false unavailable warnings caused by the startup-only timer probe before entities are fully loaded.
+
 ## 0.1.4
 
 - Synchronized controller shutoff so turning off either the main or night entity also turns off the other one and cancels the timer.

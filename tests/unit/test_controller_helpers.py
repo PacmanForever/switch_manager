@@ -61,6 +61,54 @@ async def test_async_start_and_stop_manage_listeners_and_cleanup(hass, monkeypat
 
 
 @pytest.mark.asyncio
+async def test_async_start_restarts_timer_for_already_on_entities(hass, monkeypatch) -> None:
+    """Runtime startup should resume timing when the managed light is already on."""
+
+    controller = _controller(night_entity="light.night")
+    hass.states.async_set("light.hallway", "on")
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._async_restart_timer = AsyncMock()
+
+    def fake_track_state_change_event(hass, entity_ids, callback):
+        return Mock()
+
+    monkeypatch.setattr(
+        "custom_components.switch_manager.controller.async_track_state_change_event",
+        fake_track_state_change_event,
+    )
+
+    await runtime.async_start()
+
+    runtime._async_restart_timer.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_async_start_does_not_report_unavailable_for_startup_timer_probe(hass, monkeypatch) -> None:
+    """Startup timer probing should not create warnings for entities that are not loaded yet."""
+
+    runtime = ControllerRuntime(hass, GlobalConfig(), _controller(), "entry-1")
+    runtime._async_restart_timer = AsyncMock()
+    report_issue = Mock()
+
+    def fake_track_state_change_event(hass, entity_ids, callback):
+        return Mock()
+
+    monkeypatch.setattr(
+        "custom_components.switch_manager.controller.async_track_state_change_event",
+        fake_track_state_change_event,
+    )
+    monkeypatch.setattr(
+        "custom_components.switch_manager.controller.report_configured_entity_unavailable",
+        report_issue,
+    )
+
+    await runtime.async_start()
+
+    runtime._async_restart_timer.assert_not_awaited()
+    report_issue.assert_not_called()
+
+
+@pytest.mark.asyncio
 async def test_force_operations_delegate_to_helper_paths(hass) -> None:
     """Force helpers should use the underlying controller methods."""
 
@@ -294,23 +342,53 @@ async def test_timer_helpers_turn_off_entities_and_clear_task(hass, monkeypatch)
     async def blocking_sleep(_seconds: int) -> None:
         await gate.wait()
 
-    monkeypatch.setattr("custom_components.switch_manager.controller.asyncio.sleep", blocking_sleep)
+    with monkeypatch.context() as context:
+        context.setattr("custom_components.switch_manager.controller.asyncio.sleep", blocking_sleep)
 
-    await runtime._async_restart_timer()
-    assert runtime._timer_task is not None
+        await runtime._async_restart_timer()
+        assert runtime._timer_task is not None
 
-    await runtime._async_cancel_timer()
-    assert runtime._timer_task is None
+        await runtime._async_cancel_timer()
+        assert runtime._timer_task is None
 
     async def immediate_sleep(_seconds: int) -> None:
         return None
 
-    monkeypatch.setattr("custom_components.switch_manager.controller.asyncio.sleep", immediate_sleep)
     runtime._timer_task = object()
     runtime._async_all_detectors_are_clear = AsyncMock(return_value=True)
-    await runtime._async_timer_worker()
+    with monkeypatch.context() as context:
+        context.setattr("custom_components.switch_manager.controller.asyncio.sleep", immediate_sleep)
+        await runtime._async_timer_worker()
+
     assert runtime._timer_task is None
     runtime._async_turn_off_controlled_entities.assert_awaited_once()
+
+    runtime = ControllerRuntime(hass, GlobalConfig(), _controller(detector_sensor_1="binary_sensor.motion1"), "entry-1")
+    runtime._async_turn_off_controlled_entities = AsyncMock()
+    detector_states = iter([False, True])
+    runtime._async_all_detectors_are_clear = AsyncMock(side_effect=lambda: next(detector_states))
+    sleep_calls = 0
+
+    async def bounded_immediate_sleep(_seconds: int) -> None:
+        nonlocal sleep_calls
+        sleep_calls += 1
+        if sleep_calls > 2:
+            raise AssertionError("timer worker looped more than expected")
+        return None
+
+    runtime._timer_task = object()
+
+    with monkeypatch.context() as context:
+        context.setattr(
+            "custom_components.switch_manager.controller.asyncio.sleep",
+            bounded_immediate_sleep,
+        )
+        await runtime._async_timer_worker()
+
+    assert sleep_calls == 2
+    assert runtime._async_all_detectors_are_clear.await_count == 2
+    runtime._async_turn_off_controlled_entities.assert_awaited_once()
+    assert runtime._timer_task is None
 
     runtime._async_turn_off_entity = AsyncMock()
     runtime._async_turn_off_controlled_entities = (
@@ -320,13 +398,12 @@ async def test_timer_helpers_turn_off_entities_and_clear_task(hass, monkeypatch)
         )
     )
     await runtime._async_turn_off_controlled_entities()
-    assert runtime._async_turn_off_entity.await_args_list[-2].args[0] == "light.hallway"
-    assert runtime._async_turn_off_entity.await_args_list[-1].args[0] == "light.night"
+    runtime._async_turn_off_entity.assert_awaited_once_with("light.hallway")
 
 
 @pytest.mark.asyncio
 async def test_timer_worker_restarts_when_detector_still_active(hass, monkeypatch) -> None:
-    """Timer expiry should restart instead of turning off while detection remains active."""
+    """Timer expiry should keep waiting until detectors clear, then turn off once."""
 
     runtime = ControllerRuntime(
         hass,
@@ -335,19 +412,29 @@ async def test_timer_worker_restarts_when_detector_still_active(hass, monkeypatc
         "entry-1",
     )
     runtime._async_turn_off_controlled_entities = AsyncMock()
-    runtime._async_restart_timer = AsyncMock()
-    runtime._async_all_detectors_are_clear = AsyncMock(return_value=False)
+    runtime._async_all_detectors_are_clear = AsyncMock(side_effect=[False, True])
 
-    async def immediate_sleep(_seconds: int) -> None:
+    sleep_calls = 0
+
+    async def bounded_immediate_sleep(_seconds: int) -> None:
+        nonlocal sleep_calls
+        sleep_calls += 1
+        if sleep_calls > 2:
+            raise AssertionError("timer worker looped more than expected")
         return None
 
-    monkeypatch.setattr("custom_components.switch_manager.controller.asyncio.sleep", immediate_sleep)
     runtime._timer_task = object()
 
-    await runtime._async_timer_worker()
+    with monkeypatch.context() as context:
+        context.setattr(
+            "custom_components.switch_manager.controller.asyncio.sleep",
+            bounded_immediate_sleep,
+        )
+        await runtime._async_timer_worker()
 
-    runtime._async_restart_timer.assert_awaited_once()
-    runtime._async_turn_off_controlled_entities.assert_not_awaited()
+    assert sleep_calls == 2
+    assert runtime._async_all_detectors_are_clear.await_count == 2
+    runtime._async_turn_off_controlled_entities.assert_awaited_once()
     assert runtime._timer_task is None
 
 
