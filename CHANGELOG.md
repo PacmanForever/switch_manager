@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.7
+
+- Fixed the outdated config-flow helper unit test so the release and CI suites match the new duration-based `wait_time` selector.
+
 ## 0.1.6
 
 - Replaced the controller turn-off delay field with a Home Assistant duration selector shown as `hh:mm:ss` while keeping stored values compatible in seconds.
