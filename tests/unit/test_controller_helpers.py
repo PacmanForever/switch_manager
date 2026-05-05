@@ -40,7 +40,6 @@ async def test_async_start_and_stop_manage_listeners_and_cleanup(hass, monkeypat
         detector_sensor_2="binary_sensor.motion2",
     )
     runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
-    runtime._validate_configured_entities = Mock()
     unsubscribers: list[Mock] = []
 
     def fake_track_state_change_event(hass, entity_ids, callback):
@@ -56,7 +55,6 @@ async def test_async_start_and_stop_manage_listeners_and_cleanup(hass, monkeypat
     await runtime.async_start()
     await runtime.async_stop()
 
-    runtime._validate_configured_entities.assert_called_once()
     assert len(unsubscribers) == 4
     for unsubscribe in unsubscribers:
         unsubscribe.assert_called_once()

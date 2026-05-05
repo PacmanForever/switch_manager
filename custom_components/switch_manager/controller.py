@@ -67,7 +67,9 @@ class ControllerRuntime:
     async def async_start(self) -> None:
         """Start runtime handling for this controller."""
         LOGGER.debug("Starting controller runtime for %s", self.controller.controller_id)
-        self._validate_configured_entities()
+        self._clear_known_configured_entity_issues()
+        if self.hass.is_running:
+            self._validate_configured_entities()
 
         self.add_unsubscriber(
             async_track_state_change_event(
@@ -547,6 +549,22 @@ class ControllerRuntime:
     def _clear_all_entity_issues(self) -> None:
         """Clear transient issues when stopping the runtime."""
         for field_name, entity_id in list(self._unavailable_entities):
+            clear_configured_entity_issue(
+                self.hass,
+                controller_id=self.controller.controller_id,
+                field_name=field_name,
+                entity_id=entity_id,
+            )
+        self._unavailable_entities.clear()
+
+    @callback
+    def _clear_known_configured_entity_issues(self) -> None:
+        """Clear stale issues for currently configured entities on startup.
+
+        This prevents false positives created during earlier startup phases from
+        lingering after the runtime is reloaded.
+        """
+        for field_name, entity_id in self._entity_checks():
             clear_configured_entity_issue(
                 self.hass,
                 controller_id=self.controller.controller_id,

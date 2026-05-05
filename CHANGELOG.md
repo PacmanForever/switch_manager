@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+- Avoided false configured-entity unavailable warnings during Home Assistant startup by deferring eager validation until the core is fully running.
+- Cleared stale configured-entity warnings for each controller when its runtime starts so old startup warnings do not linger after reloads.
+
 ## 0.1.2
 
 - Migrated controllers from storage-backed records to Home Assistant config subentries so they appear directly under the integration page.
