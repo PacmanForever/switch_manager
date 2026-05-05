@@ -47,7 +47,7 @@
       },
       "add_controller": {
         "title": "Add switch/light controller",
-        "description": "Create a controller with required and optional runtime fields. \"Turn off when detector clears\" takes precedence over \"Turn off delay\".",
+        "description": "Create a controller with required and optional runtime fields.",
         "data": {
           "enabled": "Enabled",
           "main_entity": "Main switch/light",
@@ -57,8 +57,8 @@
           "detector_sensor_2": "Motion/Presence detector 2",
           "illuminance_threshold_entity": "Turn on if illuminance is below",
           "illuminance_sensor": "Illuminance sensor",
-          "turn_off_when_presence_clears": "Turn off when detector clears (overrides delay)",
-          "wait_time": "Turn off delay (in seconds, ignored when detector clears is enabled)",
+          "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
+          "wait_time": "Turn off delay (in seconds, unless detector clears first)",
           "notify_with_alarm": "Notify when turn on and alarm is actived",
           "turn_off_entity_1": "On turn on, turn off the switch/light 1",
           "turn_off_entity_2": "On turn on, turn off the switch/light 2"
@@ -81,7 +81,7 @@
       },
       "edit_controller": {
         "title": "Edit controller",
-        "description": "Update the selected controller. \"Turn off when detector clears\" takes precedence over \"Turn off delay\".",
+        "description": "Update the selected controller.",
         "data": {
           "enabled": "Enabled",
           "main_entity": "Main switch/light",
@@ -91,8 +91,8 @@
           "detector_sensor_2": "Motion/Presence detector 2",
           "illuminance_threshold_entity": "Turn on if illuminance is below",
           "illuminance_sensor": "Illuminance sensor",
-          "wait_time": "Turn off delay (in seconds, ignored when detector clears is enabled)",
-          "turn_off_when_presence_clears": "Turn off when detector clears (overrides delay)",
+          "wait_time": "Turn off delay (in seconds, unless detector clears first)",
+          "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
           "notify_with_alarm": "Notify when turn on and alarm is actived",
           "turn_off_entity_1": "On turn on, turn off 1",
           "turn_off_entity_2": "On turn on, turn off 2"
@@ -115,7 +115,7 @@
   "config_subentries": {
     "controller": {
       "abort": {
-        "reconfigure_successful": "[%key:common::config_flow::abort::reconfigure_successful%]"
+        "reconfigure_successful": "Controller updated"
       },
       "entry_type": "Controller",
       "initiate_flow": {
@@ -125,7 +125,7 @@
       "step": {
         "user": {
           "title": "Add controller",
-          "description": "Create a controller with required and optional runtime fields. \"Turn off when detector clears\" takes precedence over \"Turn off delay\".",
+          "description": "Create a controller with required and optional runtime fields.",
           "data": {
             "enabled": "Enabled",
             "main_entity": "Main switch/light",
@@ -135,8 +135,8 @@
             "detector_sensor_2": "Motion/Presence detector 2",
             "illuminance_threshold_entity": "Turn on if illuminance is below",
             "illuminance_sensor": "Illuminance sensor",
-            "turn_off_when_presence_clears": "Turn off when detector clears (overrides delay)",
-            "wait_time": "Turn off delay (in seconds, ignored when detector clears is enabled)",
+            "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
+            "wait_time": "Turn off delay (in seconds, unless detector clears first)",
             "notify_with_alarm": "Notify when turn on and alarm is actived",
             "turn_off_entity_1": "On turn on, turn off the switch/light 1",
             "turn_off_entity_2": "On turn on, turn off the switch/light 2"
@@ -144,7 +144,7 @@
         },
         "reconfigure": {
           "title": "Edit controller",
-          "description": "Update the selected controller. \"Turn off when detector clears\" takes precedence over \"Turn off delay\".",
+          "description": "Update the selected controller.",
           "data": {
             "enabled": "Enabled",
             "main_entity": "Main switch/light",
@@ -154,8 +154,8 @@
             "detector_sensor_2": "Motion/Presence detector 2",
             "illuminance_threshold_entity": "Turn on if illuminance is below",
             "illuminance_sensor": "Illuminance sensor",
-            "turn_off_when_presence_clears": "Turn off when detector clears (overrides delay)",
-            "wait_time": "Turn off delay (in seconds, ignored when detector clears is enabled)",
+            "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
+            "wait_time": "Turn off delay (in seconds, unless detector clears first)",
             "notify_with_alarm": "Notify when turn on and alarm is actived",
             "turn_off_entity_1": "On turn on, turn off the switch/light 1",
             "turn_off_entity_2": "On turn on, turn off the switch/light 2"

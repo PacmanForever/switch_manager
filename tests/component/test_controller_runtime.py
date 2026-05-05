@@ -115,3 +115,67 @@ async def test_manual_main_on_restarts_timer_and_turns_off_secondaries(hass) -> 
 
     runtime._async_turn_off_configured_entities.assert_awaited_once_with(["light.other", None])
     runtime._async_restart_timer.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_manual_main_off_turns_off_night_too(hass) -> None:
+    """Turning off the main entity manually should also turn off the night entity."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "night_entity": "light.hallway_night",
+            "wait_time": 120,
+        }
+    )
+    hass.states.async_set("light.hallway_night", "on")
+
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._async_cancel_timer = AsyncMock()
+    runtime._async_turn_off_entity = AsyncMock()
+
+    await runtime._async_handle_main_entity_event(
+        Event(
+            "state_changed",
+            {
+                "entity_id": "light.hallway",
+                "new_state": State("light.hallway", "off"),
+            },
+        )
+    )
+
+    runtime._async_cancel_timer.assert_awaited_once()
+    runtime._async_turn_off_entity.assert_awaited_once_with("light.hallway_night")
+
+
+@pytest.mark.asyncio
+async def test_manual_night_off_turns_off_main_too(hass) -> None:
+    """Turning off the night entity manually should also turn off the main entity."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "night_entity": "light.hallway_night",
+            "wait_time": 120,
+        }
+    )
+    hass.states.async_set("light.hallway", "on")
+
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    runtime._async_cancel_timer = AsyncMock()
+    runtime._async_turn_off_entity = AsyncMock()
+
+    await runtime._async_handle_optional_entity_event(
+        Event(
+            "state_changed",
+            {
+                "entity_id": "light.hallway_night",
+                "new_state": State("light.hallway_night", "off"),
+            },
+        )
+    )
+
+    runtime._async_cancel_timer.assert_awaited_once()
+    runtime._async_turn_off_entity.assert_awaited_once_with("light.hallway")

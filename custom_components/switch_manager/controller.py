@@ -179,11 +179,15 @@ class ControllerRuntime:
             await self._async_restart_timer()
             return
 
-        if new_state.state == STATE_OFF and not await self._async_is_entity_on(
+        if new_state.state != STATE_OFF:
+            return
+
+        await self._async_cancel_timer()
+        if await self._async_is_entity_on(
             self.controller.main_entity,
-            field_name="main_entity",
+            field_name=CONF_MAIN_ENTITY,
         ):
-            await self._async_cancel_timer()
+            await self._async_turn_off_entity(self.controller.main_entity)
 
     async def _async_handle_detector_state_change(self, new_state: State) -> None:
         """Process detector-triggered runtime logic."""

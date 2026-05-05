@@ -122,7 +122,8 @@ async def test_optional_entity_events_cover_detector_ignore_and_night_off(hass) 
     runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
     runtime._async_handle_detector_state_change = AsyncMock()
     runtime._async_cancel_timer = AsyncMock()
-    runtime._async_is_entity_on = AsyncMock(return_value=False)
+    runtime._async_is_entity_on = AsyncMock(return_value=True)
+    runtime._async_turn_off_entity = AsyncMock()
 
     await runtime._async_handle_optional_entity_event(
         Event("state_changed", {"entity_id": "binary_sensor.motion1", "new_state": State("binary_sensor.motion1", "on")})
@@ -136,6 +137,7 @@ async def test_optional_entity_events_cover_detector_ignore_and_night_off(hass) 
 
     runtime._async_handle_detector_state_change.assert_awaited_once()
     runtime._async_cancel_timer.assert_awaited_once()
+    runtime._async_turn_off_entity.assert_awaited_once_with("light.hallway")
 
 
 @pytest.mark.asyncio

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4
+
+- Synchronized controller shutoff so turning off either the main or night entity also turns off the other one and cancels the timer.
+- Refined controller form wording to better describe detector-clear behavior relative to the configured delay.
+- Fixed the controller reconfigure success dialog so it shows a proper translated message instead of a raw translation key.
+
 ## 0.1.3
 
 - Avoided false configured-entity unavailable warnings during Home Assistant startup by deferring eager validation until the core is fully running.
