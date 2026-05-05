@@ -10,6 +10,7 @@ import pytest
 from homeassistant.config_entries import ConfigSubentry
 from homeassistant.exceptions import HomeAssistantError
 
+from custom_components.switch_manager.config_flow import OPTIONS_GLOBALS_SAVED
 from custom_components.switch_manager.manager import SwitchManagerRuntime
 from custom_components.switch_manager.const import SUBENTRY_TYPE_CONTROLLER
 from custom_components.switch_manager.models import ControllerConfig
@@ -123,7 +124,12 @@ async def test_async_unload_stops_all_active_runtimes(hass) -> None:
 async def test_async_reload_refreshes_global_config_and_reuses_setup(hass) -> None:
     """Reload should unload first, rebuild global config, and setup again."""
 
-    config_entry = _config_entry(options={"smart_mode_entity": "binary_sensor.smart"})
+    config_entry = _config_entry(
+        options={
+            OPTIONS_GLOBALS_SAVED: True,
+            "smart_mode_entity": "binary_sensor.smart",
+        }
+    )
     runtime = SwitchManagerRuntime(hass, config_entry)
     runtime.async_unload = AsyncMock()
     runtime.async_setup = AsyncMock()

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.8
+
+- Fixed the Home Assistant form defaults so clearing optional global and controller entity selectors no longer repopulates old values when the form is reopened.
+- Preserved explicitly saved empty global settings instead of falling back to the original config-entry data.
+- Rejected controller configurations where the main and night entities are the same.
+
 ## 0.1.7
 
 - Fixed the outdated config-flow helper unit test so the release and CI suites match the new duration-based `wait_time` selector.

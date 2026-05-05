@@ -12,6 +12,7 @@ from homeassistant.exceptions import HomeAssistantError
 
 from .controller import ControllerRuntime
 from .const import SUBENTRY_TYPE_CONTROLLER
+from .config_flow import _entry_global_defaults
 from .models import ControllerConfig, GlobalConfig
 
 LOGGER = logging.getLogger(__name__)
@@ -24,9 +25,7 @@ class SwitchManagerRuntime:
         """Initialize the runtime manager."""
         self.hass = hass
         self.config_entry = config_entry
-        self.global_config = GlobalConfig.from_mapping(
-            config_entry.options or config_entry.data
-        )
+        self.global_config = GlobalConfig.from_mapping(_entry_global_defaults(config_entry))
         self.controllers: dict[str, ControllerConfig] = {}
         self._controller_subentries: dict[str, ConfigSubentry] = {}
         self._controller_runtimes: dict[str, ControllerRuntime] = {}
@@ -73,7 +72,7 @@ class SwitchManagerRuntime:
         """Reload the runtime state from config entry and storage."""
         await self.async_unload()
         self.global_config = GlobalConfig.from_mapping(
-            self.config_entry.options or self.config_entry.data
+            _entry_global_defaults(self.config_entry)
         )
         await self.async_setup()
 

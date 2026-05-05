@@ -38,6 +38,7 @@ from .const import (
 from .models import ControllerConfig, GlobalConfig
 
 STEP_GLOBAL_SETTINGS = "global_settings"
+OPTIONS_GLOBALS_SAVED = "_globals_saved"
 
 OPTIONAL_CONTROLLER_ENTITY_FIELDS = (
     CONF_NIGHT_ENTITY,
@@ -92,9 +93,27 @@ def _normalize_controller_input(user_input: dict[str, Any]) -> dict[str, Any]:
 
     return {
         **user_input,
-        **normalized_optional_entities,
+        **{
+            field: value
+            for field, value in normalized_optional_entities.items()
+            if value is not None
+        },
         CONF_WAIT_TIME: wait_time_seconds,
     }
+
+
+def _entry_global_defaults(config_entry: config_entries.ConfigEntry) -> dict[str, Any]:
+    """Return the effective global settings source for forms and runtime.
+
+    Config-entry `data` contains the original setup payload. Once the options flow
+    has been saved at least once, options must win even when the user cleared all
+    optional globals and the resulting mapping would otherwise be empty.
+    """
+    options = dict(config_entry.options)
+    if options.get(OPTIONS_GLOBALS_SAVED):
+        options.pop(OPTIONS_GLOBALS_SAVED, None)
+        return options
+    return dict(config_entry.data)
 
 
 def _derive_controller_name(
@@ -122,10 +141,10 @@ def _optional_selector_field(
     selector_value: selector.Selector,
     default: Any | None = None,
 ) -> Any:
-    """Create an optional selector field with a default only when present."""
+    """Create an optional selector field with a suggested value when present."""
     if default is None:
         return vol.Optional(key)
-    return vol.Optional(key, default=default)
+    return vol.Optional(key, description={"suggested_value": default})
 
 
 def _build_global_config_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
@@ -319,6 +338,11 @@ def _main_entity_in_use(
     return False
 
 
+def _main_and_night_entities_match(controller_input: dict[str, Any]) -> bool:
+    """Return whether main and night entities point to the same entity."""
+    return controller_input.get(CONF_MAIN_ENTITY) == controller_input.get(CONF_NIGHT_ENTITY)
+
+
 def _controller_schema_defaults(
     submitted: dict[str, Any] | None,
     *,
@@ -391,13 +415,17 @@ class SwitchManagerOptionsFlow(config_entries.OptionsFlow):
         """Edit the shared global configuration."""
         if user_input is not None:
             config = GlobalConfig.from_mapping(user_input)
-            return self.async_create_entry(title="", data=config.as_dict())
+            return self.async_create_entry(
+                title="",
+                data={
+                    OPTIONS_GLOBALS_SAVED: True,
+                    **config.as_dict(),
+                },
+            )
 
         return self.async_show_form(
             step_id=STEP_GLOBAL_SETTINGS,
-            data_schema=_build_global_config_schema(
-                self._config_entry.options or self._config_entry.data
-            ),
+            data_schema=_build_global_config_schema(_entry_global_defaults(self._config_entry)),
         )
 
 
@@ -413,7 +441,9 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
 
         if user_input is not None:
             normalized_input = _normalize_controller_input(user_input)
-            if _main_entity_in_use(entry, normalized_input[CONF_MAIN_ENTITY]):
+            if _main_and_night_entities_match(normalized_input):
+                errors["base"] = "main_and_night_entity_must_differ"
+            elif _main_entity_in_use(entry, normalized_input[CONF_MAIN_ENTITY]):
                 errors["base"] = "main_entity_already_configured"
             else:
                 controller_name = _derive_controller_name(
@@ -457,7 +487,9 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
 
         if user_input is not None:
             normalized_input = _normalize_controller_input(user_input)
-            if _main_entity_in_use(
+            if _main_and_night_entities_match(normalized_input):
+                errors["base"] = "main_and_night_entity_must_differ"
+            elif _main_entity_in_use(
                 entry,
                 normalized_input[CONF_MAIN_ENTITY],
                 ignore_subentry_id=subentry.subentry_id,

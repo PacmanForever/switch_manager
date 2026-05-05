@@ -7,12 +7,14 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import pytest
+import voluptuous as vol
 
 from homeassistant.config_entries import ConfigSubentry
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.switch_manager.config_flow import (
+    OPTIONS_GLOBALS_SAVED,
     SwitchManagerConfigFlow,
     SwitchManagerControllerSubentryFlow,
     SwitchManagerOptionsFlow,
@@ -62,7 +64,7 @@ async def test_options_flow_clears_optional_global_entities(hass) -> None:
     result = await flow.async_step_global_settings({})
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["data"] == {}
+    assert result["data"] == {OPTIONS_GLOBALS_SAVED: True}
 
 
 @pytest.mark.asyncio
@@ -182,8 +184,45 @@ async def test_controller_subentry_flow_clears_optional_entities_on_reconfigure(
 
     assert result["type"] is FlowResultType.ABORT
     data = hass.config_entries.async_update_subentry.call_args.kwargs["data"]
-    assert data["night_entity"] is None
-    assert data["detector_sensor_1"] is None
+    assert "night_entity" not in data
+    assert "detector_sensor_1" not in data
+
+
+@pytest.mark.asyncio
+async def test_controller_subentry_reconfigure_form_stays_clear_for_removed_entities(hass) -> None:
+    """Reopening a controller with cleared optional entities should not restore them."""
+    flow = SwitchManagerControllerSubentryFlow()
+    flow.hass = hass
+    flow.handler = ("entry-1", SUBENTRY_TYPE_CONTROLLER)
+    flow.context = {"source": "reconfigure", "subentry_id": "sub-1"}
+
+    subentry = ConfigSubentry(
+        data=MappingProxyType(
+            {
+                "main_entity": "light.hallway",
+                "wait_time": 120,
+                "enabled": True,
+                "activate_on_detection": True,
+                "turn_off_when_presence_clears": False,
+                "notify_with_alarm": False,
+            }
+        ),
+        subentry_id="sub-1",
+        subentry_type=SUBENTRY_TYPE_CONTROLLER,
+        title="Hallway",
+        unique_id="hallway",
+    )
+    entry = SimpleNamespace(subentries={"sub-1": subentry})
+
+    with patch.object(flow, "_get_entry", return_value=entry), patch.object(
+        flow, "_get_reconfigure_subentry", return_value=subentry
+    ):
+        result = await flow.async_step_reconfigure()
+
+    schema = result["data_schema"]
+    optional_keys = [key for key in schema.schema if getattr(key, "schema", None) == "night_entity"]
+    assert optional_keys
+    assert optional_keys[0].default is vol.UNDEFINED
 
 
 @pytest.mark.asyncio
@@ -229,6 +268,75 @@ async def test_controller_subentry_flow_rejects_duplicate_main_entity(hass) -> N
 
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {"base": "main_entity_already_configured"}
+
+
+@pytest.mark.asyncio
+async def test_controller_subentry_flow_rejects_same_main_and_night_entity(hass) -> None:
+    """The controller subentry flow should reject reusing one entity as main and night."""
+    flow = SwitchManagerControllerSubentryFlow()
+    flow.hass = hass
+    flow.handler = ("entry-1", SUBENTRY_TYPE_CONTROLLER)
+    flow.context = {"source": "user"}
+
+    with patch.object(flow, "_get_entry", return_value=SimpleNamespace(subentries={})):
+        result = await flow.async_step_user(
+            {
+                "main_entity": "light.hallway",
+                "night_entity": "light.hallway",
+                "wait_time": 120,
+                "enabled": True,
+                "activate_on_detection": True,
+                "turn_off_when_presence_clears": False,
+                "notify_with_alarm": False,
+            }
+        )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "main_and_night_entity_must_differ"}
+
+
+@pytest.mark.asyncio
+async def test_controller_subentry_flow_reconfigure_rejects_same_main_and_night_entity(hass) -> None:
+    """Reconfigure should also reject using the same entity for main and night."""
+    flow = SwitchManagerControllerSubentryFlow()
+    flow.hass = hass
+    flow.handler = ("entry-1", SUBENTRY_TYPE_CONTROLLER)
+    flow.context = {"source": "reconfigure", "subentry_id": "sub-1"}
+    subentry = ConfigSubentry(
+        data=MappingProxyType(
+            {
+                "main_entity": "light.hallway",
+                "wait_time": 120,
+                "enabled": True,
+                "activate_on_detection": True,
+                "turn_off_when_presence_clears": False,
+                "notify_with_alarm": False,
+            }
+        ),
+        subentry_id="sub-1",
+        subentry_type=SUBENTRY_TYPE_CONTROLLER,
+        title="Hallway",
+        unique_id="hallway",
+    )
+    entry = SimpleNamespace(subentries={"sub-1": subentry})
+
+    with patch.object(flow, "_get_entry", return_value=entry), patch.object(
+        flow, "_get_reconfigure_subentry", return_value=subentry
+    ):
+        result = await flow.async_step_reconfigure(
+            {
+                "main_entity": "light.hallway",
+                "night_entity": "light.hallway",
+                "wait_time": 120,
+                "enabled": True,
+                "activate_on_detection": True,
+                "turn_off_when_presence_clears": False,
+                "notify_with_alarm": False,
+            }
+        )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "main_and_night_entity_must_differ"}
 
 
 def test_controller_schema_uses_duration_selector_defaults() -> None:
