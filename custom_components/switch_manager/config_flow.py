@@ -39,6 +39,63 @@ from .models import ControllerConfig, GlobalConfig
 
 STEP_GLOBAL_SETTINGS = "global_settings"
 
+OPTIONAL_CONTROLLER_ENTITY_FIELDS = (
+    CONF_NIGHT_ENTITY,
+    CONF_DETECTOR_SENSOR_1,
+    CONF_DETECTOR_SENSOR_2,
+    CONF_ILLUMINANCE_THRESHOLD_ENTITY,
+    CONF_ILLUMINANCE_SENSOR,
+    CONF_TURN_OFF_ENTITY_1,
+    CONF_TURN_OFF_ENTITY_2,
+)
+
+
+def _wait_time_selector_default(seconds: int) -> dict[str, int]:
+    """Convert stored seconds into the duration selector shape."""
+    hours, remainder = divmod(seconds, 3600)
+    minutes, remaining_seconds = divmod(remainder, 60)
+    return {
+        "hours": hours,
+        "minutes": minutes,
+        "seconds": remaining_seconds,
+    }
+
+
+def _normalize_optional_entity_selector(value: Any) -> str | None:
+    """Normalize optional entity selector values coming from forms."""
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise vol.Invalid(f"Expected entity id string, got {type(value)!r}")
+    cleaned = value.strip()
+    return cleaned or None
+
+
+def _normalize_controller_input(user_input: dict[str, Any]) -> dict[str, Any]:
+    """Convert controller form payloads into storage-friendly values."""
+    wait_time_value = user_input[CONF_WAIT_TIME]
+    if isinstance(wait_time_value, dict):
+        wait_time_seconds = (
+            int(wait_time_value.get("days", 0)) * 86400
+            + int(wait_time_value.get("hours", 0)) * 3600
+            + int(wait_time_value.get("minutes", 0)) * 60
+            + int(wait_time_value.get("seconds", 0))
+            + int(wait_time_value.get("milliseconds", 0)) // 1000
+        )
+    else:
+        wait_time_seconds = int(wait_time_value)
+
+    normalized_optional_entities = {
+        field: _normalize_optional_entity_selector(user_input.get(field))
+        for field in OPTIONAL_CONTROLLER_ENTITY_FIELDS
+    }
+
+    return {
+        **user_input,
+        **normalized_optional_entities,
+        CONF_WAIT_TIME: wait_time_seconds,
+    }
+
 
 def _derive_controller_name(
     hass, main_entity: str, *, fallback: str | None = None
@@ -190,13 +247,13 @@ def _build_controller_schema(defaults: dict[str, Any] | None = None) -> vol.Sche
             ): selector.BooleanSelector(),
             vol.Required(
                 CONF_WAIT_TIME,
-                default=values.wait_time if values else 120,
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=1,
-                    mode=selector.NumberSelectorMode.BOX,
-                    step=1,
-                    unit_of_measurement="s",
+                default=_wait_time_selector_default(
+                    values.wait_time if values else 120
+                ),
+            ): selector.DurationSelector(
+                selector.DurationSelectorConfig(
+                    enable_day=False,
+                    allow_negative=False,
                 )
             ),
             vol.Required(
@@ -355,12 +412,13 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            if _main_entity_in_use(entry, user_input[CONF_MAIN_ENTITY]):
+            normalized_input = _normalize_controller_input(user_input)
+            if _main_entity_in_use(entry, normalized_input[CONF_MAIN_ENTITY]):
                 errors["base"] = "main_entity_already_configured"
             else:
                 controller_name = _derive_controller_name(
                     self.hass,
-                    user_input[CONF_MAIN_ENTITY],
+                    normalized_input[CONF_MAIN_ENTITY],
                 )
                 existing_ids = {
                     subentry.unique_id
@@ -370,7 +428,7 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
                 }
                 return self.async_create_entry(
                     title=controller_name,
-                    data=user_input,
+                    data=normalized_input,
                     unique_id=_build_controller_id(controller_name, existing_ids),
                 )
 
@@ -398,23 +456,24 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
         errors: dict[str, str] = {}
 
         if user_input is not None:
+            normalized_input = _normalize_controller_input(user_input)
             if _main_entity_in_use(
                 entry,
-                user_input[CONF_MAIN_ENTITY],
+                normalized_input[CONF_MAIN_ENTITY],
                 ignore_subentry_id=subentry.subentry_id,
             ):
                 errors["base"] = "main_entity_already_configured"
             else:
                 controller_name = _derive_controller_name(
                     self.hass,
-                    user_input[CONF_MAIN_ENTITY],
+                    normalized_input[CONF_MAIN_ENTITY],
                     fallback=subentry.title,
                 )
                 return self.async_update_and_abort(
                     entry,
                     subentry,
                     title=controller_name,
-                    data=user_input,
+                    data=normalized_input,
                 )
 
         return self.async_show_form(

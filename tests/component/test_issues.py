@@ -19,20 +19,21 @@ from custom_components.switch_manager.models import ControllerConfig, GlobalConf
 
 @pytest.mark.asyncio
 async def test_unavailable_configured_entity_creates_issue(hass) -> None:
-    """Configured-but-unavailable optional entities should create a warning issue."""
+    """Configured-but-unavailable runtime dependencies should create a warning issue when used."""
     controller = ControllerConfig.from_mapping(
         {
             "id": "hallway",
             "name": "Hallway",
             "main_entity": "light.hallway",
             "wait_time": 60,
-            "night_entity": "light.hallway_night",
+            "detector_sensor_1": "binary_sensor.hallway_motion",
         }
     )
     hass.states.async_set("light.hallway", "off")
 
     runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
     await runtime.async_start()
+    runtime._get_state("binary_sensor.hallway_motion", "detector_sensor_1")
 
     issue_registry = ir.async_get(hass)
     assert any(
@@ -52,6 +53,32 @@ async def test_issue_clears_when_entity_recovers(hass) -> None:
             "name": "Hallway",
             "main_entity": "light.hallway",
             "wait_time": 60,
+            "detector_sensor_1": "binary_sensor.hallway_motion",
+        }
+    )
+    hass.states.async_set("light.hallway", "off")
+
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+    await runtime.async_start()
+    runtime._get_state("binary_sensor.hallway_motion", "detector_sensor_1")
+    hass.states.async_set("binary_sensor.hallway_motion", "off")
+    runtime._get_state("binary_sensor.hallway_motion", "detector_sensor_1")
+
+    issue_registry = ir.async_get(hass)
+    assert not issue_registry.issues
+
+    await runtime.async_stop()
+
+
+@pytest.mark.asyncio
+async def test_unavailable_night_entity_does_not_create_issue(hass) -> None:
+    """An unavailable optional night entity should fall back silently without a Repairs issue."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "wait_time": 60,
             "night_entity": "light.hallway_night",
         }
     )
@@ -59,8 +86,6 @@ async def test_issue_clears_when_entity_recovers(hass) -> None:
 
     runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
     await runtime.async_start()
-    hass.states.async_set("light.hallway_night", "off")
-    runtime._get_state("light.hallway_night", "night_entity")
 
     issue_registry = ir.async_get(hass)
     assert not issue_registry.issues

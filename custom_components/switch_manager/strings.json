@@ -58,7 +58,7 @@
           "illuminance_threshold_entity": "Turn on if illuminance is below",
           "illuminance_sensor": "Illuminance sensor",
           "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
-          "wait_time": "Turn off delay (in seconds, unless detector clears first)",
+          "wait_time": "Turn off delay (unless detector clears first)",
           "notify_with_alarm": "Notify when turn on and alarm is actived",
           "turn_off_entity_1": "On turn on, turn off the switch/light 1",
           "turn_off_entity_2": "On turn on, turn off the switch/light 2"
@@ -91,7 +91,7 @@
           "detector_sensor_2": "Motion/Presence detector 2",
           "illuminance_threshold_entity": "Turn on if illuminance is below",
           "illuminance_sensor": "Illuminance sensor",
-          "wait_time": "Turn off delay (in seconds, unless detector clears first)",
+          "wait_time": "Turn off delay (unless detector clears first)",
           "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
           "notify_with_alarm": "Notify when turn on and alarm is actived",
           "turn_off_entity_1": "On turn on, turn off 1",
@@ -139,7 +139,7 @@
             "illuminance_threshold_entity": "Turn on if illuminance is below",
             "illuminance_sensor": "Illuminance sensor",
             "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
-            "wait_time": "Turn off delay (in seconds, unless detector clears first)",
+            "wait_time": "Turn off delay (unless detector clears first)",
             "notify_with_alarm": "Notify when turn on and alarm is actived",
             "turn_off_entity_1": "On turn on, turn off the switch/light 1",
             "turn_off_entity_2": "On turn on, turn off the switch/light 2"
@@ -158,7 +158,7 @@
             "illuminance_threshold_entity": "Turn on if illuminance is below",
             "illuminance_sensor": "Illuminance sensor",
             "turn_off_when_presence_clears": "Turn off when detector clears (may turn off before delay)",
-            "wait_time": "Turn off delay (in seconds, unless detector clears first)",
+            "wait_time": "Turn off delay (unless detector clears first)",
             "notify_with_alarm": "Notify when turn on and alarm is actived",
             "turn_off_entity_1": "On turn on, turn off the switch/light 1",
             "turn_off_entity_2": "On turn on, turn off the switch/light 2"

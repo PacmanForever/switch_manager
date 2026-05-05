@@ -43,6 +43,9 @@ ARMED_ALARM_STATES = {
     "armed_night",
     "armed_vacation",
 }
+UNAVAILABLE_ISSUE_SUPPRESSED_FIELDS = {
+    CONF_NIGHT_ENTITY,
+}
 
 
 class ControllerRuntime:
@@ -68,8 +71,6 @@ class ControllerRuntime:
         """Start runtime handling for this controller."""
         LOGGER.debug("Starting controller runtime for %s", self.controller.controller_id)
         self._clear_known_configured_entity_issues()
-        if self.hass.is_running:
-            self._validate_configured_entities()
 
         self.add_unsubscriber(
             async_track_state_change_event(
@@ -455,6 +456,8 @@ class ControllerRuntime:
         state = self.hass.states.get(entity_id)
         issue_key = (field_name, entity_id)
         if state is None or state.state in {STATE_UNAVAILABLE, STATE_UNKNOWN}:
+            if field_name in UNAVAILABLE_ISSUE_SUPPRESSED_FIELDS:
+                return None
             if issue_key not in self._unavailable_entities:
                 LOGGER.warning(
                     "Configured entity %s for controller %s field %s is unavailable; falling back when possible",
@@ -529,12 +532,6 @@ class ControllerRuntime:
             return float(state.state)
         except (TypeError, ValueError):
             return None
-
-    @callback
-    def _validate_configured_entities(self) -> None:
-        """Check configured optional entities so issues appear immediately on startup."""
-        for field_name, entity_id in self._entity_checks():
-            self._get_state(entity_id, field_name)
 
     @callback
     def _entity_checks(self) -> list[tuple[str, str]]:

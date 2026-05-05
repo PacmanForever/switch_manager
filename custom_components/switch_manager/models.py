@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
 from dataclasses import dataclass
 from typing import Any
 
@@ -53,7 +54,24 @@ def _normalize_wait_time(value: Any) -> int:
     """Normalize the controller safety wait time."""
     if value is None:
         raise ValueError("wait_time is required")
-    wait_time = int(value)
+    if isinstance(value, timedelta):
+        wait_time = int(value.total_seconds())
+    elif isinstance(value, dict):
+        units = {
+            "days": 86400,
+            "hours": 3600,
+            "minutes": 60,
+            "seconds": 1,
+            "milliseconds": 0.001,
+        }
+        total_seconds = 0.0
+        for key, multiplier in units.items():
+            unit_value = value.get(key, 0)
+            if unit_value:
+                total_seconds += float(unit_value) * multiplier
+        wait_time = int(total_seconds)
+    else:
+        wait_time = int(value)
     if wait_time <= 0:
         raise ValueError("wait_time must be a positive integer")
     return wait_time

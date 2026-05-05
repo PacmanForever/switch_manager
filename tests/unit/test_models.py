@@ -64,6 +64,7 @@ def test_normalizers_cover_invalid_and_empty_values() -> None:
         _normalize_bool("yes", default=False)
 
     assert _normalize_wait_time("12") == 12
+    assert _normalize_wait_time({"hours": 1, "minutes": 2, "seconds": 3}) == 3723
     with pytest.raises(ValueError, match="positive integer"):
         _normalize_wait_time(0)
 

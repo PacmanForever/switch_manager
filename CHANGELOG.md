@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.6
+
+- Replaced the controller turn-off delay field with a Home Assistant duration selector shown as `hh:mm:ss` while keeping stored values compatible in seconds.
+- Fixed controller reconfiguration so clearing optional entity selectors persists the removal instead of restoring old values on the next edit.
+- Suppressed false unavailable warnings for optional night entities so fallback behavior stays silent instead of creating a Repairs issue.
+- Added regression coverage for clearing optional global settings and controller optional entities through the config flows.
+
 ## 0.1.5
 
 - Blocked creating or reconfiguring multiple controllers that use the same main switch/light.
