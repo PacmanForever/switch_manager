@@ -21,13 +21,14 @@ def _controller(
     *,
     enabled: bool = True,
     main_entity: str | None = None,
+    wait_time: int = 60,
 ) -> ControllerConfig:
     return ControllerConfig.from_mapping(
         {
             "id": controller_id,
             "name": controller_id.title(),
             "main_entity": main_entity or f"light.{controller_id}",
-            "wait_time": 60,
+            "wait_time": wait_time,
             "enabled": enabled,
         }
     )
@@ -121,24 +122,88 @@ async def test_async_unload_stops_all_active_runtimes(hass) -> None:
 
 
 @pytest.mark.asyncio
-async def test_async_reload_refreshes_global_config_and_reuses_setup(hass) -> None:
-    """Reload should unload first, rebuild global config, and setup again."""
+async def test_async_reload_restarts_all_runtimes_when_global_config_changes(hass) -> None:
+    """Global setting changes should still force a full runtime reload."""
 
+    initial_entry = _config_entry()
     config_entry = _config_entry(
         options={
             OPTIONS_GLOBALS_SAVED: True,
             "smart_mode_entity": "binary_sensor.smart",
         }
     )
-    runtime = SwitchManagerRuntime(hass, config_entry)
+    runtime = SwitchManagerRuntime(hass, initial_entry)
+    runtime.config_entry = config_entry
     runtime.async_unload = AsyncMock()
-    runtime.async_setup = AsyncMock()
+    runtime._async_start_controller = AsyncMock()
 
     await runtime.async_reload()
 
     runtime.async_unload.assert_awaited_once()
-    runtime.async_setup.assert_awaited_once()
+    runtime._async_start_controller.assert_not_awaited()
     assert runtime.global_config.smart_mode_entity == "binary_sensor.smart"
+
+
+@pytest.mark.asyncio
+async def test_async_reload_only_restarts_changed_controller_runtime(hass) -> None:
+    """A single-controller change should not stop unrelated runtimes."""
+
+    config_entry = _config_entry(_controller("hallway"), _controller("kitchen", wait_time=60))
+    runtime = SwitchManagerRuntime(hass, config_entry)
+    hallway_runtime = SimpleNamespace(async_stop=AsyncMock())
+    kitchen_runtime = SimpleNamespace(async_stop=AsyncMock())
+    runtime.controllers = {
+        "hallway": _controller("hallway"),
+        "kitchen": _controller("kitchen"),
+    }
+    runtime._controller_runtimes = {
+        "hallway": hallway_runtime,
+        "kitchen": kitchen_runtime,
+    }
+    runtime._controller_subentries = config_entry.subentries
+    runtime._async_start_controller = AsyncMock()
+
+    updated_entry = _config_entry(
+        _controller("hallway", wait_time=180),
+        _controller("kitchen"),
+    )
+    runtime.config_entry = updated_entry
+
+    await runtime.async_reload()
+
+    hallway_runtime.async_stop.assert_awaited_once()
+    kitchen_runtime.async_stop.assert_not_awaited()
+    runtime._async_start_controller.assert_awaited_once()
+    assert runtime._async_start_controller.await_args.args[0].controller_id == "hallway"
+    assert runtime._controller_runtimes["kitchen"] is kitchen_runtime
+
+
+@pytest.mark.asyncio
+async def test_async_reload_stops_removed_controller_only(hass) -> None:
+    """Removing one controller should leave the others running."""
+
+    config_entry = _config_entry(_controller("hallway"), _controller("kitchen"))
+    runtime = SwitchManagerRuntime(hass, config_entry)
+    hallway_runtime = SimpleNamespace(async_stop=AsyncMock())
+    kitchen_runtime = SimpleNamespace(async_stop=AsyncMock())
+    runtime.controllers = {
+        "hallway": _controller("hallway"),
+        "kitchen": _controller("kitchen"),
+    }
+    runtime._controller_runtimes = {
+        "hallway": hallway_runtime,
+        "kitchen": kitchen_runtime,
+    }
+    runtime._controller_subentries = config_entry.subentries
+    runtime.config_entry = _config_entry(_controller("kitchen"))
+    runtime._async_start_controller = AsyncMock()
+
+    await runtime.async_reload()
+
+    hallway_runtime.async_stop.assert_awaited_once()
+    kitchen_runtime.async_stop.assert_not_awaited()
+    runtime._async_start_controller.assert_not_awaited()
+    assert set(runtime._controller_runtimes) == {"kitchen"}
 
 
 def test_get_controller_returns_known_controller_and_raises_for_unknown(hass) -> None:

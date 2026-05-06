@@ -49,6 +49,10 @@ OPTIONAL_CONTROLLER_ENTITY_FIELDS = (
     CONF_TURN_OFF_ENTITY_1,
     CONF_TURN_OFF_ENTITY_2,
 )
+OWNED_CONTROLLER_ENTITY_FIELDS = (
+    CONF_MAIN_ENTITY,
+    CONF_NIGHT_ENTITY,
+)
 
 
 def _wait_time_selector_default(seconds: int) -> dict[str, int]:
@@ -343,6 +347,35 @@ def _main_and_night_entities_match(controller_input: dict[str, Any]) -> bool:
     return controller_input.get(CONF_MAIN_ENTITY) == controller_input.get(CONF_NIGHT_ENTITY)
 
 
+def _controlled_entity_in_use(
+    entry: config_entries.ConfigEntry,
+    controller_input: dict[str, Any],
+    *,
+    ignore_subentry_id: str | None = None,
+) -> bool:
+    """Return whether another controller already owns a main or night entity."""
+    controlled_entities = {
+        controller_input[field]
+        for field in OWNED_CONTROLLER_ENTITY_FIELDS
+        if controller_input.get(field) is not None
+    }
+    if not controlled_entities:
+        return False
+
+    for subentry in entry.subentries.values():
+        if subentry.subentry_type != SUBENTRY_TYPE_CONTROLLER:
+            continue
+        if ignore_subentry_id is not None and subentry.subentry_id == ignore_subentry_id:
+            continue
+
+        for field in OWNED_CONTROLLER_ENTITY_FIELDS:
+            entity_id = subentry.data.get(field)
+            if entity_id in controlled_entities:
+                return True
+
+    return False
+
+
 def _controller_schema_defaults(
     submitted: dict[str, Any] | None,
     *,
@@ -445,6 +478,8 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
                 errors["base"] = "main_and_night_entity_must_differ"
             elif _main_entity_in_use(entry, normalized_input[CONF_MAIN_ENTITY]):
                 errors["base"] = "main_entity_already_configured"
+            elif _controlled_entity_in_use(entry, normalized_input):
+                errors["base"] = "controlled_entity_already_configured"
             else:
                 controller_name = _derive_controller_name(
                     self.hass,
@@ -495,6 +530,12 @@ class SwitchManagerControllerSubentryFlow(config_entries.ConfigSubentryFlow):
                 ignore_subentry_id=subentry.subentry_id,
             ):
                 errors["base"] = "main_entity_already_configured"
+            elif _controlled_entity_in_use(
+                entry,
+                normalized_input,
+                ignore_subentry_id=subentry.subentry_id,
+            ):
+                errors["base"] = "controlled_entity_already_configured"
             else:
                 controller_name = _derive_controller_name(
                     self.hass,

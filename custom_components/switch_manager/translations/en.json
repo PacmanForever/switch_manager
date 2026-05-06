@@ -118,6 +118,7 @@
         "reconfigure_successful": "Controller updated"
       },
       "error": {
+        "controlled_entity_already_configured": "This controller's main or night switch/light is already used by another controller.",
         "main_and_night_entity_must_differ": "Main switch/light and night switch/light must be different entities.",
         "main_entity_already_configured": "A controller with this main switch/light already exists."
       },

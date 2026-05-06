@@ -160,3 +160,50 @@ async def test_timer_expiry_turns_off_without_detectors(hass, monkeypatch) -> No
 
     runtime._async_turn_off_entity.assert_awaited_once_with("light.hallway")
     assert runtime._timer_task is None
+
+
+@pytest.mark.asyncio
+async def test_concurrent_timer_restarts_do_not_leave_orphaned_tasks(
+    hass, monkeypatch
+) -> None:
+    """Concurrent timer restarts should cancel superseded tasks cleanly."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "wait_time": 60,
+        }
+    )
+    runtime = ControllerRuntime(hass, GlobalConfig(), controller, "entry-1")
+
+    created_tasks: list[asyncio.Task[None]] = []
+
+    async def parked_timer_worker() -> None:
+        await asyncio.Future()
+
+    monkeypatch.setattr(runtime, "_async_timer_worker", parked_timer_worker)
+
+    original_create_task = hass.async_create_task
+
+    def tracking_create_task(coro):
+        task = original_create_task(coro)
+        created_tasks.append(task)
+        return task
+
+    monkeypatch.setattr(hass, "async_create_task", tracking_create_task)
+
+    original_timer = original_create_task(parked_timer_worker())
+    runtime._timer_task = original_timer
+
+    restart_one = asyncio.create_task(runtime._async_restart_timer())
+    restart_two = asyncio.create_task(runtime._async_restart_timer())
+    await asyncio.gather(restart_one, restart_two)
+
+    assert len(created_tasks) == 2
+    assert created_tasks[0].cancelled()
+    assert not created_tasks[1].done()
+    assert runtime._timer_task is created_tasks[1]
+
+    await runtime._async_cancel_timer()
+    assert created_tasks[1].cancelled()

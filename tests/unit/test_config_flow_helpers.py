@@ -17,6 +17,7 @@ from custom_components.switch_manager.config_flow import (
     SwitchManagerConfigFlow,
     SwitchManagerControllerSubentryFlow,
     SwitchManagerOptionsFlow,
+    _controlled_entity_in_use,
     _main_entity_in_use,
     _build_controller_id,
     _build_controller_schema,
@@ -58,6 +59,49 @@ def test_main_entity_in_use_detects_other_controller_subentries() -> None:
     assert _main_entity_in_use(entry, "light.hallway") is True
     assert _main_entity_in_use(entry, "light.kitchen") is False
     assert _main_entity_in_use(entry, "light.hallway", ignore_subentry_id="sub-1") is False
+
+
+def test_controlled_entity_in_use_detects_overlapping_outputs() -> None:
+    entry = SimpleNamespace(
+        subentries={
+            "sub-1": ConfigSubentry(
+                data=MappingProxyType(
+                    {
+                        "main_entity": "light.hallway",
+                        "night_entity": "light.hallway_night",
+                        "turn_off_entity_1": "light.kitchen",
+                    }
+                ),
+                subentry_id="sub-1",
+                subentry_type=SUBENTRY_TYPE_CONTROLLER,
+                title="Hallway",
+                unique_id="hallway",
+            )
+        }
+    )
+
+    assert (
+        _controlled_entity_in_use(
+            entry,
+            {"main_entity": "light.office", "night_entity": "light.hallway_night"},
+        )
+        is True
+    )
+    assert (
+        _controlled_entity_in_use(
+            entry,
+            {"main_entity": "light.office", "turn_off_entity_1": "light.hallway_night"},
+        )
+        is False
+    )
+    assert (
+        _controlled_entity_in_use(
+            entry,
+            {"main_entity": "light.hallway", "night_entity": "light.office"},
+            ignore_subentry_id="sub-1",
+        )
+        is False
+    )
 
 
 def test_schema_builders_accept_expected_payloads() -> None:

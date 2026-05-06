@@ -63,6 +63,7 @@ class ControllerRuntime:
         self.global_config = global_config
         self.controller = controller
         self.config_entry_id = config_entry_id
+        self._timer_lock = asyncio.Lock()
         self._timer_task: asyncio.Task[None] | None = None
         self._unsubscribers: list[Callable[[], None]] = []
         self._unavailable_entities: set[tuple[str, str]] = set()
@@ -360,11 +361,17 @@ class ControllerRuntime:
 
     async def _async_restart_timer(self) -> None:
         """Restart the safety timer for this controller."""
-        await self._async_cancel_timer()
-        self._timer_task = self.hass.async_create_task(self._async_timer_worker())
+        async with self._timer_lock:
+            await self._async_cancel_timer_locked()
+            self._timer_task = self.hass.async_create_task(self._async_timer_worker())
 
     async def _async_cancel_timer(self) -> None:
         """Cancel the active safety timer if present."""
+        async with self._timer_lock:
+            await self._async_cancel_timer_locked()
+
+    async def _async_cancel_timer_locked(self) -> None:
+        """Cancel the active safety timer while holding the timer lock."""
         if self._timer_task is None:
             return
 

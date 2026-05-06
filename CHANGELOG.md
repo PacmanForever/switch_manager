@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.9
+
+- Serialized each controller timer lifecycle so concurrent restart/cancel paths cannot leave orphaned timer tasks behind.
+- Reloaded only the controller runtimes affected by a controller-level configuration change instead of restarting all controllers together.
+- Prevented controller ownership conflicts for main and night entities while still allowing explicit `turn_off_entity_1` and `turn_off_entity_2` cross-controller targets.
+
 ## 0.1.8
 
 - Fixed the Home Assistant form defaults so clearing optional global and controller entity selectors no longer repopulates old values when the form is reopened.
