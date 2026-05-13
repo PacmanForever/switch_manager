@@ -1,10 +1,10 @@
 # SwitchFlow Controller
 
 [![HACS][hacsbadge]][hacs]
-[![Version](https://img.shields.io/github/v/tag/PacmanForever/switch_manager?label=version)](https://github.com/PacmanForever/switch_manager/tags)
-[![Tests](https://github.com/PacmanForever/switch_manager/actions/workflows/tests.yml/badge.svg)](https://github.com/PacmanForever/switch_manager/actions/workflows/tests.yml)
-[![Validate HACS](https://github.com/PacmanForever/switch_manager/actions/workflows/validate_hacs.yml/badge.svg)](https://github.com/PacmanForever/switch_manager/actions/workflows/validate_hacs.yml)
-[![Validate Hassfest](https://github.com/PacmanForever/switch_manager/actions/workflows/validate_hassfest.yml/badge.svg)](https://github.com/PacmanForever/switch_manager/actions/workflows/validate_hassfest.yml)
+[![Version](https://img.shields.io/github/v/tag/PacmanForever/switchflow_controller?label=version)](https://github.com/PacmanForever/switchflow_controller/tags)
+[![Tests](https://github.com/PacmanForever/switchflow_controller/actions/workflows/tests.yml/badge.svg)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/tests.yml)
+[![Validate HACS](https://github.com/PacmanForever/switchflow_controller/actions/workflows/validate_hacs.yml/badge.svg)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/validate_hacs.yml)
+[![Validate Hassfest](https://github.com/PacmanForever/switchflow_controller/actions/workflows/validate_hassfest.yml/badge.svg)](https://github.com/PacmanForever/switchflow_controller/actions/workflows/validate_hassfest.yml)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 ![Coverage](https://img.shields.io/badge/coverage-%E2%89%A595%25-blue)
 
@@ -36,7 +36,7 @@ A community Home Assistant custom integration for managing reusable motion-drive
 2. Open HACS.
 3. Go to `Integrations`.
 4. Open the top-right menu and choose `Custom repositories`.
-5. Add `https://github.com/PacmanForever/switch_manager` as the custom repository URL.
+5. Add `https://github.com/PacmanForever/switchflow_controller` as the custom repository URL.
 6. Select the `Integration` category.
 7. Install `SwitchFlow Controller`.
 8. Restart Home Assistant.

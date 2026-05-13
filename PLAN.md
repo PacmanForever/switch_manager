@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document defines the implementation plan for a new Home Assistant custom integration named `switch_manager` to be developed in `/home/pacman/Projectes/switch_manager`.
+This document defines the implementation plan for a new Home Assistant custom integration named `switch_manager` to be developed in `/home/pacman/Projectes/switchflow_controller`.
 
 The integration should replace the current blueprint-style automation pattern with a conservative, compatibility-first runtime integration that is easier to maintain across future Home Assistant releases.
 
@@ -831,7 +831,7 @@ Only after the core is stable, evaluate:
 
 The following decisions are already agreed and should not be reopened unless implementation reveals a real blocker:
 
-1. The work belongs in `/home/pacman/Projectes/switch_manager`.
+1. The work belongs in `/home/pacman/Projectes/switchflow_controller`.
 2. The implementation must be in English.
 3. There is no global hub.
 4. Shared settings live in one main config entry.
