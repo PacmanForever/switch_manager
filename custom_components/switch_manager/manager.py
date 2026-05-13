@@ -1,4 +1,4 @@
-"""Runtime manager for the Switch Manager integration."""
+"""Runtime manager for the SwitchFlow Controller integration."""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ class SwitchManagerRuntime:
             await self._async_start_controller(controller)
 
         LOGGER.debug(
-            "Switch Manager runtime loaded %s controller(s)",
+            "SwitchFlow Controller runtime loaded %s controller(s)",
             len(self._controller_runtimes),
         )
 

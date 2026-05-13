@@ -1,4 +1,4 @@
-"""Storage helpers for Switch Manager controller configuration."""
+"""Storage helpers for SwitchFlow Controller controller configuration."""
 
 from __future__ import annotations
 

@@ -1,9 +1,9 @@
 {
-  "title": "Switch Manager",
+  "title": "SwitchFlow Controller",
   "config": {
     "step": {
       "user": {
-        "title": "Set up Switch Manager",
+        "title": "Set up SwitchFlow Controller",
         "description": "Configure the shared global references used by controllers.",
         "data": {
           "smart_mode_entity": "Smart mode active",
@@ -15,19 +15,19 @@
       }
     },
     "abort": {
-      "single_instance_allowed": "Only one Switch Manager configuration entry is supported."
+      "single_instance_allowed": "Only one SwitchFlow Controller configuration entry is supported."
     }
   },
   "issues": {
     "configured_entity_unavailable": {
       "title": "Configured entity is unavailable",
-      "description": "The configured entity `{entity_id}` for controller `{controller_name}` field `{field_name}` is unavailable. Switch Manager will use fallback behavior when possible until the entity becomes available again."
+      "description": "The configured entity `{entity_id}` for controller `{controller_name}` field `{field_name}` is unavailable. SwitchFlow Controller will use fallback behavior when possible until the entity becomes available again."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Switch Manager",
+        "title": "SwitchFlow Controller",
         "description": "Review existing controllers or choose what you want to do next.",
         "data": {
           "init_action": "Action",
@@ -110,7 +110,7 @@
     "error": {
       "no_controllers": "Select a controller for this action first."
     },
-    "flow_title": "Switch Manager"
+    "flow_title": "SwitchFlow Controller"
   },
   "config_subentries": {
     "controller": {

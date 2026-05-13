@@ -1,4 +1,4 @@
-"""Issue registry helpers for Switch Manager."""
+"""Issue registry helpers for SwitchFlow Controller."""
 
 from __future__ import annotations
 

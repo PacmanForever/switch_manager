@@ -158,13 +158,13 @@ async def test_user_flow_shows_form_without_input(hass) -> None:
 
 @pytest.mark.asyncio
 async def test_async_get_options_flow_returns_options_flow() -> None:
-    entry = MockConfigEntry(domain=DOMAIN, title="Switch Manager", data={})
+    entry = MockConfigEntry(domain=DOMAIN, title="SwitchFlow Controller", data={})
     options_flow = SwitchManagerConfigFlow.async_get_options_flow(entry)
     assert isinstance(options_flow, SwitchManagerOptionsFlow)
 
 
 def test_config_flow_supports_controller_subentries() -> None:
-    entry = MockConfigEntry(domain=DOMAIN, title="Switch Manager", data={})
+    entry = MockConfigEntry(domain=DOMAIN, title="SwitchFlow Controller", data={})
     supported = SwitchManagerConfigFlow.async_get_supported_subentry_types(entry)
 
     assert supported == {SUBENTRY_TYPE_CONTROLLER: SwitchManagerControllerSubentryFlow}
@@ -172,7 +172,7 @@ def test_config_flow_supports_controller_subentries() -> None:
 
 @pytest.mark.asyncio
 async def test_options_flow_init_opens_global_settings(hass) -> None:
-    entry = MockConfigEntry(domain=DOMAIN, title="Switch Manager", data={})
+    entry = MockConfigEntry(domain=DOMAIN, title="SwitchFlow Controller", data={})
     flow = SwitchManagerOptionsFlow(entry)
     flow.hass = hass
 
@@ -184,7 +184,7 @@ async def test_options_flow_init_opens_global_settings(hass) -> None:
 
 @pytest.mark.asyncio
 async def test_options_flow_global_settings_handles_form_and_save(hass) -> None:
-    entry = MockConfigEntry(domain=DOMAIN, title="Switch Manager", data={"smart_mode_entity": "binary_sensor.smart"})
+    entry = MockConfigEntry(domain=DOMAIN, title="SwitchFlow Controller", data={"smart_mode_entity": "binary_sensor.smart"})
     flow = SwitchManagerOptionsFlow(entry)
     flow.hass = hass
 

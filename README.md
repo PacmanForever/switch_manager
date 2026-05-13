@@ -1,4 +1,4 @@
-# Switch Manager
+# SwitchFlow Controller
 
 [![HACS][hacsbadge]][hacs]
 [![Version](https://img.shields.io/github/v/tag/PacmanForever/switch_manager?label=version)](https://github.com/PacmanForever/switch_manager/tags)
@@ -38,7 +38,7 @@ A community Home Assistant custom integration for managing reusable motion-drive
 4. Open the top-right menu and choose `Custom repositories`.
 5. Add `https://github.com/PacmanForever/switch_manager` as the custom repository URL.
 6. Select the `Integration` category.
-7. Install `Switch Manager`.
+7. Install `SwitchFlow Controller`.
 8. Restart Home Assistant.
 
 The repository already includes [validate_hacs.yml](.github/workflows/validate_hacs.yml) and [validate_hassfest.yml](.github/workflows/validate_hassfest.yml) so release readiness can be checked in CI.

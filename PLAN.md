@@ -1,4 +1,4 @@
-# Switch Manager Implementation Plan
+# SwitchFlow Controller Implementation Plan
 
 ## 1. Purpose
 

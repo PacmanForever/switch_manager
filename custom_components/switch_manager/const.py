@@ -1,11 +1,11 @@
-"""Constants for the Switch Manager integration."""
+"""Constants for the SwitchFlow Controller integration."""
 
 from __future__ import annotations
 
 from typing import Final
 
 DOMAIN: Final = "switch_manager"
-TITLE: Final = "Switch Manager"
+TITLE: Final = "SwitchFlow Controller"
 
 CONF_ACTIVATE_ON_DETECTION: Final = "activate_on_detection"
 CONF_ALARM_ENTITY: Final = "alarm_entity"

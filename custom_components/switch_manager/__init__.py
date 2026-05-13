@@ -1,4 +1,4 @@
-"""The Switch Manager integration."""
+"""The SwitchFlow Controller integration."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ SwitchManagerConfigEntry = ConfigEntry
 async def async_setup_entry(
     hass: HomeAssistant, config_entry: SwitchManagerConfigEntry
 ) -> bool:
-    """Set up Switch Manager from a config entry."""
+    """Set up SwitchFlow Controller from a config entry."""
     await _async_migrate_legacy_storage_to_subentries(hass, config_entry)
 
     manager = SwitchManagerRuntime(hass, config_entry)
@@ -37,7 +37,7 @@ async def async_setup_entry(
 async def async_unload_entry(
     hass: HomeAssistant, config_entry: SwitchManagerConfigEntry
 ) -> bool:
-    """Unload a Switch Manager config entry."""
+    """Unload a SwitchFlow Controller config entry."""
     entry_data = hass.data.get(DOMAIN, {}).pop(config_entry.entry_id, None)
     if entry_data is not None:
         manager: SwitchManagerRuntime = entry_data[DATA_MANAGER]

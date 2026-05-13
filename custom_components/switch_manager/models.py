@@ -1,4 +1,4 @@
-"""Domain models for the Switch Manager integration."""
+"""Domain models for the SwitchFlow Controller integration."""
 
 from __future__ import annotations
 

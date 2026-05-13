@@ -1,4 +1,4 @@
-"""Config flow for the Switch Manager integration."""
+"""Config flow for the SwitchFlow Controller integration."""
 
 from __future__ import annotations
 
@@ -393,7 +393,7 @@ def _controller_schema_defaults(
 
 
 class SwitchManagerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle the initial setup flow for Switch Manager."""
+    """Handle the initial setup flow for SwitchFlow Controller."""
 
     VERSION = 1
 

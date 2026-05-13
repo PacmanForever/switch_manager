@@ -1,4 +1,4 @@
-"""Controller runtime logic for Switch Manager."""
+"""Controller runtime logic for the SwitchFlow Controller integration."""
 
 from __future__ import annotations
 
@@ -263,7 +263,7 @@ class ControllerRuntime:
                 self.global_config.alarm_notification_script_entity.split(".", 1)[1],
                 {
                     "message": (
-                        f"Switch Manager alarm notification from {self.controller.name}"
+                        f"SwitchFlow Controller alarm notification from {self.controller.name}"
                     ),
                     "controller_name": self.controller.name,
                     "trigger_entity_id": self._first_active_detector(),

@@ -48,7 +48,7 @@ async def test_options_flow_clears_optional_global_entities(hass) -> None:
     """Clearing optional global selectors should replace stored options with an empty payload."""
     config_entry = MockConfigEntry(
         domain=DOMAIN,
-        title="Switch Manager",
+        title="SwitchFlow Controller",
         data={},
         options={
             "smart_mode_entity": "input_boolean.smart_mode",

@@ -60,7 +60,7 @@ async def test_async_setup_entry_migrates_legacy_storage_to_subentries(hass, mon
     manager = SimpleNamespace(async_setup=AsyncMock())
     manager_factory = Mock(return_value=manager)
     setup_services = AsyncMock()
-    config_entry = MockConfigEntry(domain=DOMAIN, title="Switch Manager", data={})
+    config_entry = MockConfigEntry(domain=DOMAIN, title="SwitchFlow Controller", data={})
     config_entry.add_to_hass(hass)
     controller = ControllerConfig.from_mapping(
         {
@@ -162,7 +162,7 @@ async def test_legacy_storage_migration_skips_when_subentries_exist(hass, monkey
 
     config_entry = MockConfigEntry(
         domain=DOMAIN,
-        title="Switch Manager",
+        title="SwitchFlow Controller",
         data={},
         subentries_data=[
             {

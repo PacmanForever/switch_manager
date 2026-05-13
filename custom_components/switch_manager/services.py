@@ -1,4 +1,4 @@
-"""Service registration for the Switch Manager integration."""
+"""Service registration for the SwitchFlow Controller integration."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ def _get_manager(hass: HomeAssistant) -> SwitchManagerRuntime:
     """Return the active runtime manager for the single supported config entry."""
     domain_data = hass.data.get(DOMAIN, {})
     if not domain_data:
-        raise ServiceValidationError("Switch Manager is not configured")
+        raise ServiceValidationError("SwitchFlow Controller is not configured")
     first_entry = next(iter(domain_data.values()))
     return first_entry[DATA_MANAGER]
 
