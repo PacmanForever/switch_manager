@@ -9,11 +9,8 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 .DS_Store
-/.ha_dev/.storage/
-/.ha_dev/home-assistant.log
-/.ha_dev/home-assistant.log.1
-/.ha_dev/home-assistant_v2.db
-/.ha_dev/home-assistant_v2.db-*
-/.ha_dev/.cloud/
-/.ha_dev/deps/
-/.ha_dev/tts/
+/.ha_dev/*
+!/.ha_dev/configuration.yaml
+!/.ha_dev/automations.yaml
+!/.ha_dev/scripts.yaml
+!/.ha_dev/scenes.yaml
