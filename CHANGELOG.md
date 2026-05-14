@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0
+
+- Renamed the Home Assistant integration domain and package from `switch_manager` to `switchflow_controller` so the repository name, manifest domain, services, and install path are aligned.
+- Updated tests, scripts, coverage configuration, and release documentation to use `custom_components/switchflow_controller` consistently.
+- Kept one-time compatibility for legacy controller storage by reading the old `switch_manager.controllers` storage key and saving it back under the new domain key.
+- This release is a breaking change for existing Home Assistant installations because old `switch_manager.*` services and config entries do not automatically migrate to the new integration domain.
+
 ## 0.2.0
 
 - Rebranded the integration to `SwitchFlow Controller` to avoid Home Assistant and HACS branding collisions with another `Switch Manager` integration.
@@ -66,7 +73,7 @@
 
 ## 0.1.0
 
-- Added the initial Home Assistant custom integration scaffold for `switch_manager`.
+- Added the initial Home Assistant custom integration scaffold for `switchflow_controller`.
 - Added config entry setup, global configuration flow, and storage-backed controller management.
 - Added runtime controller handling for main entity activation, night-mode fallback, alarm notifications, illuminance gating, and delayed shutoff.
 - Added warning-level Repairs issues for configured-but-unavailable entities.

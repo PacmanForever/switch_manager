@@ -1,11 +1,11 @@
-"""Component tests for switch_manager illuminance behavior."""
+"""Component tests for switchflow_controller illuminance behavior."""
 
 from __future__ import annotations
 
 import pytest
 
-from custom_components.switch_manager.controller import ControllerRuntime
-from custom_components.switch_manager.models import ControllerConfig, GlobalConfig
+from custom_components.switchflow_controller.controller import ControllerRuntime
+from custom_components.switchflow_controller.models import ControllerConfig, GlobalConfig
 
 
 @pytest.mark.asyncio

@@ -1,5 +1,5 @@
 {
-  "domain": "switch_manager",
+  "domain": "switchflow_controller",
   "name": "SwitchFlow Controller",
   "codeowners": ["@PacmanForever"],
   "config_flow": true,
@@ -9,5 +9,5 @@
   "issue_tracker": "https://github.com/PacmanForever/switchflow_controller/issues",
   "requirements": [],
   "single_config_entry": true,
-  "version": "0.2.0"
+  "version": "0.3.0"
 }

@@ -1,11 +1,11 @@
-"""Tests for switch_manager domain models."""
+"""Tests for switchflow_controller domain models."""
 
 from __future__ import annotations
 
 import pytest
 
-from custom_components.switch_manager.const import CONF_MAIN_ENTITY, CONF_WAIT_TIME
-from custom_components.switch_manager.models import (
+from custom_components.switchflow_controller.const import CONF_MAIN_ENTITY, CONF_WAIT_TIME
+from custom_components.switchflow_controller.models import (
     ControllerConfig,
     GlobalConfig,
     _normalize_bool,

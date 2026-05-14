@@ -1,4 +1,4 @@
-"""Component tests for switch_manager runtime behavior."""
+"""Component tests for switchflow_controller runtime behavior."""
 
 from __future__ import annotations
 
@@ -8,8 +8,8 @@ import pytest
 
 from homeassistant.core import Event, State
 
-from custom_components.switch_manager.controller import ControllerRuntime
-from custom_components.switch_manager.models import ControllerConfig, GlobalConfig
+from custom_components.switchflow_controller.controller import ControllerRuntime
+from custom_components.switchflow_controller.models import ControllerConfig, GlobalConfig
 
 
 @pytest.mark.asyncio

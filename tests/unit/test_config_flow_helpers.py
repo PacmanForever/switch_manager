@@ -12,7 +12,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from homeassistant.config_entries import ConfigSubentry
 
-from custom_components.switch_manager.config_flow import (
+from custom_components.switchflow_controller.config_flow import (
     STEP_GLOBAL_SETTINGS,
     SwitchManagerConfigFlow,
     SwitchManagerControllerSubentryFlow,
@@ -24,7 +24,7 @@ from custom_components.switch_manager.config_flow import (
     _build_global_config_schema,
     _derive_controller_name,
 )
-from custom_components.switch_manager.const import DOMAIN, SUBENTRY_TYPE_CONTROLLER
+from custom_components.switchflow_controller.const import DOMAIN, SUBENTRY_TYPE_CONTROLLER
 
 
 def test_derive_controller_name_prefers_friendly_name(hass) -> None:

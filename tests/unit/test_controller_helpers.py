@@ -11,8 +11,8 @@ import pytest
 from homeassistant.const import STATE_IDLE
 from homeassistant.core import Event, State
 
-from custom_components.switch_manager.controller import ControllerRuntime
-from custom_components.switch_manager.models import ControllerConfig, GlobalConfig
+from custom_components.switchflow_controller.controller import ControllerRuntime
+from custom_components.switchflow_controller.models import ControllerConfig, GlobalConfig
 
 
 def _controller(**overrides) -> ControllerConfig:
@@ -48,7 +48,7 @@ async def test_async_start_and_stop_manage_listeners_and_cleanup(hass, monkeypat
         return unsubscribe
 
     monkeypatch.setattr(
-        "custom_components.switch_manager.controller.async_track_state_change_event",
+        "custom_components.switchflow_controller.controller.async_track_state_change_event",
         fake_track_state_change_event,
     )
 
@@ -73,7 +73,7 @@ async def test_async_start_restarts_timer_for_already_on_entities(hass, monkeypa
         return Mock()
 
     monkeypatch.setattr(
-        "custom_components.switch_manager.controller.async_track_state_change_event",
+        "custom_components.switchflow_controller.controller.async_track_state_change_event",
         fake_track_state_change_event,
     )
 
@@ -94,11 +94,11 @@ async def test_async_start_does_not_report_unavailable_for_startup_timer_probe(h
         return Mock()
 
     monkeypatch.setattr(
-        "custom_components.switch_manager.controller.async_track_state_change_event",
+        "custom_components.switchflow_controller.controller.async_track_state_change_event",
         fake_track_state_change_event,
     )
     monkeypatch.setattr(
-        "custom_components.switch_manager.controller.report_configured_entity_unavailable",
+        "custom_components.switchflow_controller.controller.report_configured_entity_unavailable",
         report_issue,
     )
 
@@ -343,7 +343,7 @@ async def test_timer_helpers_turn_off_entities_and_clear_task(hass, monkeypatch)
         await gate.wait()
 
     with monkeypatch.context() as context:
-        context.setattr("custom_components.switch_manager.controller.asyncio.sleep", blocking_sleep)
+        context.setattr("custom_components.switchflow_controller.controller.asyncio.sleep", blocking_sleep)
 
         await runtime._async_restart_timer()
         assert runtime._timer_task is not None
@@ -357,7 +357,7 @@ async def test_timer_helpers_turn_off_entities_and_clear_task(hass, monkeypatch)
     runtime._timer_task = object()
     runtime._async_all_detectors_are_clear = AsyncMock(return_value=True)
     with monkeypatch.context() as context:
-        context.setattr("custom_components.switch_manager.controller.asyncio.sleep", immediate_sleep)
+        context.setattr("custom_components.switchflow_controller.controller.asyncio.sleep", immediate_sleep)
         await runtime._async_timer_worker()
 
     assert runtime._timer_task is None
@@ -380,7 +380,7 @@ async def test_timer_helpers_turn_off_entities_and_clear_task(hass, monkeypatch)
 
     with monkeypatch.context() as context:
         context.setattr(
-            "custom_components.switch_manager.controller.asyncio.sleep",
+            "custom_components.switchflow_controller.controller.asyncio.sleep",
             bounded_immediate_sleep,
         )
         await runtime._async_timer_worker()
@@ -427,7 +427,7 @@ async def test_timer_worker_restarts_when_detector_still_active(hass, monkeypatc
 
     with monkeypatch.context() as context:
         context.setattr(
-            "custom_components.switch_manager.controller.asyncio.sleep",
+            "custom_components.switchflow_controller.controller.asyncio.sleep",
             bounded_immediate_sleep,
         )
         await runtime._async_timer_worker()
@@ -468,8 +468,8 @@ async def test_entity_helpers_cover_service_calls_and_detector_state_checks(hass
 
     report_issue = Mock()
     clear_issue = Mock()
-    monkeypatch.setattr("custom_components.switch_manager.controller.report_configured_entity_unavailable", report_issue)
-    monkeypatch.setattr("custom_components.switch_manager.controller.clear_configured_entity_issue", clear_issue)
+    monkeypatch.setattr("custom_components.switchflow_controller.controller.report_configured_entity_unavailable", report_issue)
+    monkeypatch.setattr("custom_components.switchflow_controller.controller.clear_configured_entity_issue", clear_issue)
 
     hass.states.async_set("binary_sensor.motion1", "off")
     hass.states.async_set("binary_sensor.motion2", "on")

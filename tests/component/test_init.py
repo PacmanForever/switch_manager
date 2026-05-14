@@ -7,14 +7,14 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from custom_components.switch_manager import (
+from custom_components.switchflow_controller import (
     _async_migrate_legacy_storage_to_subentries,
     _async_update_listener,
     async_setup_entry,
     async_unload_entry,
 )
-from custom_components.switch_manager.const import DATA_MANAGER, DOMAIN
-from custom_components.switch_manager.models import ControllerConfig
+from custom_components.switchflow_controller.const import DATA_MANAGER, DOMAIN
+from custom_components.switchflow_controller.models import ControllerConfig
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 
@@ -32,13 +32,13 @@ async def test_async_setup_entry_registers_manager_and_services(hass, monkeypatc
     )
 
     monkeypatch.setattr(
-        "custom_components.switch_manager.SwitchManagerRuntime", manager_factory
+        "custom_components.switchflow_controller.SwitchManagerRuntime", manager_factory
     )
     monkeypatch.setattr(
-        "custom_components.switch_manager.async_setup_services", setup_services
+        "custom_components.switchflow_controller.async_setup_services", setup_services
     )
     monkeypatch.setattr(
-        "custom_components.switch_manager._async_migrate_legacy_storage_to_subentries",
+        "custom_components.switchflow_controller._async_migrate_legacy_storage_to_subentries",
         AsyncMock(),
     )
 
@@ -72,17 +72,17 @@ async def test_async_setup_entry_migrates_legacy_storage_to_subentries(hass, mon
     )
 
     monkeypatch.setattr(
-        "custom_components.switch_manager.SwitchManagerRuntime", manager_factory
+        "custom_components.switchflow_controller.SwitchManagerRuntime", manager_factory
     )
     monkeypatch.setattr(
-        "custom_components.switch_manager.async_setup_services", setup_services
+        "custom_components.switchflow_controller.async_setup_services", setup_services
     )
     monkeypatch.setattr(
-        "custom_components.switch_manager.SwitchManagerStorage.async_load",
+        "custom_components.switchflow_controller.SwitchManagerStorage.async_load",
         AsyncMock(return_value=[controller]),
     )
     monkeypatch.setattr(
-        "custom_components.switch_manager.SwitchManagerStorage.async_clear",
+        "custom_components.switchflow_controller.SwitchManagerStorage.async_clear",
         AsyncMock(),
     )
 
@@ -105,7 +105,7 @@ async def test_async_unload_entry_unloads_last_manager_and_services(hass, monkey
     hass.data[DOMAIN] = {"entry-1": {DATA_MANAGER: manager}}
 
     monkeypatch.setattr(
-        "custom_components.switch_manager.async_unload_services", unload_services
+        "custom_components.switchflow_controller.async_unload_services", unload_services
     )
 
     result = await async_unload_entry(hass, config_entry)
@@ -131,7 +131,7 @@ async def test_async_unload_entry_keeps_services_when_other_entries_exist(
     }
 
     monkeypatch.setattr(
-        "custom_components.switch_manager.async_unload_services", unload_services
+        "custom_components.switchflow_controller.async_unload_services", unload_services
     )
 
     result = await async_unload_entry(hass, config_entry)
@@ -177,7 +177,7 @@ async def test_legacy_storage_migration_skips_when_subentries_exist(hass, monkey
     config_entry.add_to_hass(hass)
     load_mock = AsyncMock()
     monkeypatch.setattr(
-        "custom_components.switch_manager.SwitchManagerStorage.async_load",
+        "custom_components.switchflow_controller.SwitchManagerStorage.async_load",
         load_mock,
     )
 

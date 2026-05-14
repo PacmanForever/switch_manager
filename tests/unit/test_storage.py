@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from custom_components.switch_manager.models import ControllerConfig
-from custom_components.switch_manager.storage import SwitchManagerStorage
+from custom_components.switchflow_controller.models import ControllerConfig
+from custom_components.switchflow_controller.storage import SwitchManagerStorage
 
 
 def _controller(controller_id: str, *, wait_time: int = 60) -> ControllerConfig:

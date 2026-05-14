@@ -1,4 +1,4 @@
-"""Component tests for switch_manager services."""
+"""Component tests for switchflow_controller services."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import pytest
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.exceptions import ServiceValidationError
 
-from custom_components.switch_manager.const import (
+from custom_components.switchflow_controller.const import (
     CONF_CONTROLLER_ID,
     DATA_MANAGER,
     DOMAIN,
@@ -18,7 +18,7 @@ from custom_components.switch_manager.const import (
     SERVICE_FORCE_TURN_ON,
     SERVICE_RESET_CONTROLLER_TIMER,
 )
-from custom_components.switch_manager.services import async_setup_services, async_unload_services
+from custom_components.switchflow_controller.services import async_setup_services, async_unload_services
 
 
 @pytest.mark.asyncio

@@ -1,1 +1,1 @@
-"""Tests for switch_manager."""
+"""Tests for switchflow_controller."""

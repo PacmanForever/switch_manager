@@ -1,4 +1,4 @@
-"""Component tests for switch_manager issue registry handling."""
+"""Component tests for switchflow_controller issue registry handling."""
 
 from __future__ import annotations
 
@@ -8,13 +8,13 @@ import pytest
 
 from homeassistant.helpers import issue_registry as ir
 
-from custom_components.switch_manager.controller import ControllerRuntime
-from custom_components.switch_manager.issues import (
+from custom_components.switchflow_controller.controller import ControllerRuntime
+from custom_components.switchflow_controller.issues import (
     _build_issue_id,
     clear_configured_entity_issue,
     report_configured_entity_unavailable,
 )
-from custom_components.switch_manager.models import ControllerConfig, GlobalConfig
+from custom_components.switchflow_controller.models import ControllerConfig, GlobalConfig
 
 
 @pytest.mark.asyncio
@@ -98,8 +98,8 @@ def test_issue_helpers_build_create_and_delete_issue(monkeypatch, hass) -> None:
 
     create_issue = Mock()
     delete_issue = Mock()
-    monkeypatch.setattr("custom_components.switch_manager.issues.ir.async_create_issue", create_issue)
-    monkeypatch.setattr("custom_components.switch_manager.issues.ir.async_delete_issue", delete_issue)
+    monkeypatch.setattr("custom_components.switchflow_controller.issues.ir.async_create_issue", create_issue)
+    monkeypatch.setattr("custom_components.switchflow_controller.issues.ir.async_delete_issue", delete_issue)
 
     issue_id = _build_issue_id("hallway", "night_entity", "light.hallway_night")
     assert issue_id.startswith("configured_entity_unavailable_hallway")

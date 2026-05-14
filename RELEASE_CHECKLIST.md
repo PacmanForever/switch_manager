@@ -8,7 +8,7 @@ Before publishing broadly, do one last pass to confirm no placeholder values rem
 
 ## Release Metadata
 
-1. Confirm the manifest version in [custom_components/switch_manager/manifest.json](custom_components/switch_manager/manifest.json) matches the release tag.
+1. Confirm the manifest version in [custom_components/switchflow_controller/manifest.json](custom_components/switchflow_controller/manifest.json) matches the release tag.
 2. Update [CHANGELOG.md](CHANGELOG.md) with release-facing notes.
 3. Verify [hacs.json](hacs.json) still matches the minimum supported Home Assistant version.
 
@@ -30,12 +30,12 @@ Then confirm GitHub Actions passes:
 ## Publication Readiness
 
 1. Ensure [LICENSE](LICENSE), [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [QUALITY.md](QUALITY.md) are up to date.
-2. Confirm [custom_components/switch_manager/services.yaml](custom_components/switch_manager/services.yaml) reflects the actual service surface.
+2. Confirm [custom_components/switchflow_controller/services.yaml](custom_components/switchflow_controller/services.yaml) reflects the actual service surface.
 3. Confirm [PLAN.md](PLAN.md) still matches the implemented architecture and deferred scope.
 4. Decide whether to keep or remove development-only folders from version control expectations, such as `.vscode`.
 
 ## Final Manual Checks
 
-1. Review Repairs strings and user-facing wording in [custom_components/switch_manager/strings.json](custom_components/switch_manager/strings.json).
+1. Review Repairs strings and user-facing wording in [custom_components/switchflow_controller/strings.json](custom_components/switchflow_controller/strings.json).
 2. Verify placeholders are gone from release-facing files.
 3. Tag the release only after the manifest and changelog are aligned.

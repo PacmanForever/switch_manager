@@ -10,10 +10,10 @@ import pytest
 from homeassistant.config_entries import ConfigSubentry
 from homeassistant.exceptions import HomeAssistantError
 
-from custom_components.switch_manager.config_flow import OPTIONS_GLOBALS_SAVED
-from custom_components.switch_manager.manager import SwitchManagerRuntime
-from custom_components.switch_manager.const import SUBENTRY_TYPE_CONTROLLER
-from custom_components.switch_manager.models import ControllerConfig
+from custom_components.switchflow_controller.config_flow import OPTIONS_GLOBALS_SAVED
+from custom_components.switchflow_controller.manager import SwitchManagerRuntime
+from custom_components.switchflow_controller.const import SUBENTRY_TYPE_CONTROLLER
+from custom_components.switchflow_controller.models import ControllerConfig
 
 
 def _controller(
@@ -94,7 +94,7 @@ async def test_async_setup_starts_only_enabled_controllers(hass, monkeypatch) ->
     FakeRuntime.created = []
     config_entry = _config_entry(_controller("hallway"), _controller("kitchen", enabled=False))
     runtime = SwitchManagerRuntime(hass, config_entry)
-    monkeypatch.setattr("custom_components.switch_manager.manager.ControllerRuntime", FakeRuntime)
+    monkeypatch.setattr("custom_components.switchflow_controller.manager.ControllerRuntime", FakeRuntime)
 
     await runtime.async_setup()
 
@@ -249,7 +249,7 @@ async def test_force_turn_on_and_off_build_ephemeral_runtime_when_missing(
     config_entry = _config_entry()
     runtime = SwitchManagerRuntime(hass, config_entry)
     runtime.controllers = {"hallway": _controller("hallway")}
-    monkeypatch.setattr("custom_components.switch_manager.manager.ControllerRuntime", FakeRuntime)
+    monkeypatch.setattr("custom_components.switchflow_controller.manager.ControllerRuntime", FakeRuntime)
 
     await runtime.async_force_turn_on("hallway")
     await runtime.async_force_turn_off("hallway")

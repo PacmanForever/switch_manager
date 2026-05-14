@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from typing import Final
 
-DOMAIN: Final = "switch_manager"
+DOMAIN: Final = "switchflow_controller"
+LEGACY_DOMAIN: Final = "switch_manager"
 TITLE: Final = "SwitchFlow Controller"
 
 CONF_ACTIVATE_ON_DETECTION: Final = "activate_on_detection"
@@ -32,6 +33,7 @@ DEFAULT_ILLUMINANCE_THRESHOLD: Final = 10.0
 DEFAULT_WAIT_TIME_SECONDS: Final = 120
 
 STORAGE_KEY: Final = f"{DOMAIN}.controllers"
+LEGACY_STORAGE_KEY: Final = f"{LEGACY_DOMAIN}.controllers"
 STORAGE_VERSION: Final = 1
 SUBENTRY_TYPE_CONTROLLER: Final = "controller"
 

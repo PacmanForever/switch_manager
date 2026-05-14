@@ -1,4 +1,4 @@
-"""Component tests for switch_manager config and options flows."""
+"""Component tests for switchflow_controller config and options flows."""
 
 from __future__ import annotations
 
@@ -13,14 +13,14 @@ from homeassistant.config_entries import ConfigSubentry
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.switch_manager.config_flow import (
+from custom_components.switchflow_controller.config_flow import (
     OPTIONS_GLOBALS_SAVED,
     SwitchManagerConfigFlow,
     SwitchManagerControllerSubentryFlow,
     SwitchManagerOptionsFlow,
     _wait_time_selector_default,
 )
-from custom_components.switch_manager.const import DOMAIN, SUBENTRY_TYPE_CONTROLLER
+from custom_components.switchflow_controller.const import DOMAIN, SUBENTRY_TYPE_CONTROLLER
 
 
 @pytest.mark.asyncio

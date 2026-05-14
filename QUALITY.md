@@ -2,7 +2,7 @@
 
 ## Goal
 
-`switch_manager` aims for a practical Home Assistant Silver-style quality level.
+`switchflow_controller` aims for a practical Home Assistant Silver-style quality level.
 
 That means:
 

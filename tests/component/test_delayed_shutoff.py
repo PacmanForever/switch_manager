@@ -1,4 +1,4 @@
-"""Component tests for switch_manager delayed shutoff behavior."""
+"""Component tests for switchflow_controller delayed shutoff behavior."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ import pytest
 
 from homeassistant.core import State
 
-from custom_components.switch_manager.controller import ControllerRuntime
-from custom_components.switch_manager.models import ControllerConfig, GlobalConfig
+from custom_components.switchflow_controller.controller import ControllerRuntime
+from custom_components.switchflow_controller.models import ControllerConfig, GlobalConfig
 
 
 @pytest.mark.asyncio
@@ -85,7 +85,7 @@ async def test_timer_expiry_restarts_when_detector_stays_on(hass, monkeypatch) -
 
     with monkeypatch.context() as context:
         context.setattr(
-            "custom_components.switch_manager.controller.asyncio.sleep",
+            "custom_components.switchflow_controller.controller.asyncio.sleep",
             immediate_sleep,
         )
         await runtime._async_timer_worker()
@@ -121,7 +121,7 @@ async def test_timer_expiry_turns_off_when_detector_is_clear(hass, monkeypatch) 
 
     with monkeypatch.context() as context:
         context.setattr(
-            "custom_components.switch_manager.controller.asyncio.sleep",
+            "custom_components.switchflow_controller.controller.asyncio.sleep",
             immediate_sleep,
         )
         await runtime._async_timer_worker()
@@ -153,7 +153,7 @@ async def test_timer_expiry_turns_off_without_detectors(hass, monkeypatch) -> No
 
     with monkeypatch.context() as context:
         context.setattr(
-            "custom_components.switch_manager.controller.asyncio.sleep",
+            "custom_components.switchflow_controller.controller.asyncio.sleep",
             immediate_sleep,
         )
         await runtime._async_timer_worker()

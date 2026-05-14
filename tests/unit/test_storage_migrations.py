@@ -1,10 +1,10 @@
-"""Unit tests for switch_manager storage normalization and migration."""
+"""Unit tests for switchflow_controller storage normalization and migration."""
 
 from __future__ import annotations
 
 import pytest
 
-from custom_components.switch_manager.storage import SwitchManagerStorage
+from custom_components.switchflow_controller.storage import SwitchManagerStorage
 
 
 def test_normalize_payload_migrates_legacy_list() -> None:

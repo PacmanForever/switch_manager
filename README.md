@@ -13,7 +13,7 @@
 A community Home Assistant custom integration for managing reusable motion-driven light and switch controllers with shared global configuration and per-controller behavior.
 
 > [!IMPORTANT]
-> `switch_manager` is designed as a compatibility-first replacement for repeated blueprint instances.
+> `switchflow_controller` is designed as a compatibility-first replacement for repeated blueprint instances.
 >
 > The integration favors simple runtime logic, standard Home Assistant configuration flows, and minimal architecture surprises over aggressive feature scope.
 
@@ -45,7 +45,7 @@ The repository already includes [validate_hacs.yml](.github/workflows/validate_h
 
 ### Manual
 
-1. Copy `custom_components/switch_manager` into your Home Assistant `custom_components` directory.
+1. Copy `custom_components/switchflow_controller` into your Home Assistant `custom_components` directory.
 2. Restart Home Assistant.
 
 ## Configuration
@@ -90,7 +90,7 @@ Each controller can define:
 
 ### Why There Is No Global Hub
 
-`switch_manager` does not use a fake "global hub".
+`switchflow_controller` does not use a fake "global hub".
 
 Shared values belong to the main config entry, not to a special system object that pretends to be a normal grouping item.
 
@@ -213,21 +213,21 @@ The current `0.1` service surface is intentionally small.
 
 Available services:
 
-- `switch_manager.enable_controller`
-- `switch_manager.disable_controller`
-- `switch_manager.reset_controller_timer`
-- `switch_manager.force_turn_on`
-- `switch_manager.force_turn_off`
+- `switchflow_controller.enable_controller`
+- `switchflow_controller.disable_controller`
+- `switchflow_controller.reset_controller_timer`
+- `switchflow_controller.force_turn_on`
+- `switchflow_controller.force_turn_off`
 
 Services are expected to target controllers by stable internal ID.
 
-See [custom_components/switch_manager/services.yaml](custom_components/switch_manager/services.yaml) for the field definitions.
+See [custom_components/switchflow_controller/services.yaml](custom_components/switchflow_controller/services.yaml) for the field definitions.
 
 ## Error Visibility
 
 Optional fields left unconfigured are valid and use fallback behavior.
 
-If an entity was configured but is currently unavailable, `switch_manager` logs a warning and creates a transient warning in Home Assistant Repairs so the problem is visible without stopping the controller when a safe fallback exists.
+If an entity was configured but is currently unavailable, `switchflow_controller` logs a warning and creates a transient warning in Home Assistant Repairs so the problem is visible without stopping the controller when a safe fallback exists.
 
 ## Quality Target
 

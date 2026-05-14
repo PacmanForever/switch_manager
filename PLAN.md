@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document defines the implementation plan for a new Home Assistant custom integration named `switch_manager` to be developed in `/home/pacman/Projectes/switchflow_controller`.
+This document defines the implementation plan for a new Home Assistant custom integration named `switchflow_controller` to be developed in `/home/pacman/Projectes/switchflow_controller`.
 
 The integration should replace the current blueprint-style automation pattern with a conservative, compatibility-first runtime integration that is easier to maintain across future Home Assistant releases.
 
@@ -472,37 +472,37 @@ These services should be documented in `services.yaml` so Home Assistant can exp
 
 Recommended files for version 1:
 
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/manifest.json`
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/__init__.py`
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/config_flow.py`
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/const.py`
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/models.py`
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/storage.py`
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/manager.py`
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/controller.py`
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/issues.py`
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/services.py`
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/services.yaml`
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/strings.json`
-- `/home/pacman/Projectes/switch_manager/custom_components/switch_manager/translations/en.json`
-- `/home/pacman/Projectes/switch_manager/.github/workflows/tests.yml`
-- `/home/pacman/Projectes/switch_manager/.github/workflows/validate_hacs.yml`
-- `/home/pacman/Projectes/switch_manager/.github/workflows/validate_hassfest.yml`
-- `/home/pacman/Projectes/switch_manager/tests/conftest.py`
-- `/home/pacman/Projectes/switch_manager/tests/component/test_config_flow.py`
-- `/home/pacman/Projectes/switch_manager/tests/component/test_options_flow_global.py`
-- `/home/pacman/Projectes/switch_manager/tests/component/test_options_flow_controller.py`
-- `/home/pacman/Projectes/switch_manager/tests/component/test_controller_runtime.py`
-- `/home/pacman/Projectes/switch_manager/tests/component/test_alarm_notifications.py`
-- `/home/pacman/Projectes/switch_manager/tests/component/test_illuminance_behavior.py`
-- `/home/pacman/Projectes/switch_manager/tests/component/test_night_mode_behavior.py`
-- `/home/pacman/Projectes/switch_manager/tests/component/test_delayed_shutoff.py`
-- `/home/pacman/Projectes/switch_manager/tests/component/test_services.py`
-- `/home/pacman/Projectes/switch_manager/tests/unit/test_storage_migrations.py`
-- `/home/pacman/Projectes/switch_manager/README.md`
-- `/home/pacman/Projectes/switch_manager/CHANGELOG.md`
-- `/home/pacman/Projectes/switch_manager/requirements-test.txt`
-- `/home/pacman/Projectes/switch_manager/pytest.ini`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/manifest.json`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/__init__.py`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/config_flow.py`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/const.py`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/models.py`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/storage.py`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/manager.py`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/controller.py`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/issues.py`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/services.py`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/services.yaml`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/strings.json`
+- `/home/pacman/Projectes/switchflow_controller/custom_components/switchflow_controller/translations/en.json`
+- `/home/pacman/Projectes/switchflow_controller/.github/workflows/tests.yml`
+- `/home/pacman/Projectes/switchflow_controller/.github/workflows/validate_hacs.yml`
+- `/home/pacman/Projectes/switchflow_controller/.github/workflows/validate_hassfest.yml`
+- `/home/pacman/Projectes/switchflow_controller/tests/conftest.py`
+- `/home/pacman/Projectes/switchflow_controller/tests/component/test_config_flow.py`
+- `/home/pacman/Projectes/switchflow_controller/tests/component/test_options_flow_global.py`
+- `/home/pacman/Projectes/switchflow_controller/tests/component/test_options_flow_controller.py`
+- `/home/pacman/Projectes/switchflow_controller/tests/component/test_controller_runtime.py`
+- `/home/pacman/Projectes/switchflow_controller/tests/component/test_alarm_notifications.py`
+- `/home/pacman/Projectes/switchflow_controller/tests/component/test_illuminance_behavior.py`
+- `/home/pacman/Projectes/switchflow_controller/tests/component/test_night_mode_behavior.py`
+- `/home/pacman/Projectes/switchflow_controller/tests/component/test_delayed_shutoff.py`
+- `/home/pacman/Projectes/switchflow_controller/tests/component/test_services.py`
+- `/home/pacman/Projectes/switchflow_controller/tests/unit/test_storage_migrations.py`
+- `/home/pacman/Projectes/switchflow_controller/README.md`
+- `/home/pacman/Projectes/switchflow_controller/CHANGELOG.md`
+- `/home/pacman/Projectes/switchflow_controller/requirements-test.txt`
+- `/home/pacman/Projectes/switchflow_controller/pytest.ini`
 
 ## 14. Quality Target
 
@@ -618,7 +618,7 @@ The README should be intentionally close in spirit to the Meteocat documentation
 - testing or quality notes
 - versioning or release notes summary if useful
 
-For `switch_manager`, only one README is required in version 1:
+For `switchflow_controller`, only one README is required in version 1:
 
 - `README.md` in English
 

@@ -1,4 +1,4 @@
-"""Shared test fixtures for switch_manager."""
+"""Shared test fixtures for switchflow_controller."""
 
 from __future__ import annotations
 

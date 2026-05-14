@@ -7,7 +7,7 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 
-from .const import STORAGE_KEY, STORAGE_VERSION
+from .const import LEGACY_STORAGE_KEY, STORAGE_KEY, STORAGE_VERSION
 from .models import ControllerConfig
 
 
@@ -17,15 +17,24 @@ class SwitchManagerStorage:
     def __init__(self, hass: HomeAssistant) -> None:
         """Initialize the storage helper."""
         self._store = Store[dict[str, Any]](hass, STORAGE_VERSION, STORAGE_KEY)
+        self._legacy_store = Store[dict[str, Any]](
+            hass,
+            STORAGE_VERSION,
+            LEGACY_STORAGE_KEY,
+        )
 
     async def async_load(self) -> list[ControllerConfig]:
         """Load controller records from storage."""
         payload = await self._store.async_load()
+        loaded_from_legacy = False
+        if not payload:
+            payload = await self._legacy_store.async_load()
+            loaded_from_legacy = payload is not None
         if not payload:
             return []
 
         normalized_payload, migrated = self._normalize_payload(payload)
-        if migrated:
+        if migrated or loaded_from_legacy:
             await self._store.async_save(normalized_payload)
 
         controllers: list[ControllerConfig] = []
