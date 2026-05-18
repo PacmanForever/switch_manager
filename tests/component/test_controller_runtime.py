@@ -88,6 +88,44 @@ async def test_manual_night_on_restarts_timer_and_turns_off_secondaries(hass) ->
 
 
 @pytest.mark.asyncio
+async def test_manual_night_on_does_nothing_when_smart_mode_is_disabled(hass) -> None:
+    """Manual night-entity activation should be ignored when smart mode is off."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "night_entity": "light.hallway_night",
+            "turn_off_entity_1": "light.other",
+            "wait_time": 120,
+        }
+    )
+    hass.states.async_set("binary_sensor.smart", "off")
+
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig.from_mapping({"smart_mode_entity": "binary_sensor.smart"}),
+        controller,
+        "entry-1",
+    )
+    runtime._async_turn_off_configured_entities = AsyncMock()
+    runtime._async_restart_timer = AsyncMock()
+
+    await runtime._async_handle_optional_entity_event(
+        Event(
+            "state_changed",
+            {
+                "entity_id": "light.hallway_night",
+                "new_state": State("light.hallway_night", "on"),
+            },
+        )
+    )
+
+    runtime._async_turn_off_configured_entities.assert_not_awaited()
+    runtime._async_restart_timer.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_manual_main_on_restarts_timer_and_turns_off_secondaries(hass) -> None:
     """Manual main-entity activation should still participate in controller timing."""
     controller = ControllerConfig.from_mapping(
@@ -115,6 +153,43 @@ async def test_manual_main_on_restarts_timer_and_turns_off_secondaries(hass) -> 
 
     runtime._async_turn_off_configured_entities.assert_awaited_once_with(["light.other", None])
     runtime._async_restart_timer.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_manual_main_on_does_nothing_when_smart_mode_is_disabled(hass) -> None:
+    """Manual main-entity activation should be ignored when smart mode is off."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "turn_off_entity_1": "light.other",
+            "wait_time": 120,
+        }
+    )
+    hass.states.async_set("binary_sensor.smart", "off")
+
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig.from_mapping({"smart_mode_entity": "binary_sensor.smart"}),
+        controller,
+        "entry-1",
+    )
+    runtime._async_turn_off_configured_entities = AsyncMock()
+    runtime._async_restart_timer = AsyncMock()
+
+    await runtime._async_handle_main_entity_event(
+        Event(
+            "state_changed",
+            {
+                "entity_id": "light.hallway",
+                "new_state": State("light.hallway", "on"),
+            },
+        )
+    )
+
+    runtime._async_turn_off_configured_entities.assert_not_awaited()
+    runtime._async_restart_timer.assert_not_awaited()
 
 
 @pytest.mark.asyncio
@@ -179,3 +254,63 @@ async def test_manual_night_off_turns_off_main_too(hass) -> None:
 
     runtime._async_cancel_timer.assert_awaited_once()
     runtime._async_turn_off_entity.assert_awaited_once_with("light.hallway")
+
+
+@pytest.mark.asyncio
+async def test_smart_mode_disabled_cancels_existing_timer(hass) -> None:
+    """Disabling smart mode should stop any running automation timer."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "wait_time": 120,
+        }
+    )
+
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig.from_mapping({"smart_mode_entity": "binary_sensor.smart"}),
+        controller,
+        "entry-1",
+    )
+    runtime._async_cancel_timer = AsyncMock()
+
+    await runtime._async_handle_optional_entity_event(
+        Event(
+            "state_changed",
+            {
+                "entity_id": "binary_sensor.smart",
+                "new_state": State("binary_sensor.smart", "off"),
+            },
+        )
+    )
+
+    runtime._async_cancel_timer.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_async_start_does_not_restore_timer_when_smart_mode_is_disabled(hass) -> None:
+    """Startup should not restore a controller timer while smart mode is off."""
+    controller = ControllerConfig.from_mapping(
+        {
+            "id": "hallway",
+            "name": "Hallway",
+            "main_entity": "light.hallway",
+            "wait_time": 120,
+        }
+    )
+    hass.states.async_set("binary_sensor.smart", "off")
+    hass.states.async_set("light.hallway", "on")
+
+    runtime = ControllerRuntime(
+        hass,
+        GlobalConfig.from_mapping({"smart_mode_entity": "binary_sensor.smart"}),
+        controller,
+        "entry-1",
+    )
+    runtime._async_restart_timer = AsyncMock()
+
+    await runtime.async_start()
+
+    runtime._async_restart_timer.assert_not_awaited()

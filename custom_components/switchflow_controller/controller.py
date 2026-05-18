@@ -90,7 +90,7 @@ class ControllerRuntime:
                 )
             )
 
-        if await self._async_any_controlled_entity_on():
+        if self._is_smart_mode_enabled() and await self._async_any_controlled_entity_on():
             await self._async_restart_timer()
 
     async def async_stop(self) -> None:
@@ -128,6 +128,7 @@ class ControllerRuntime:
         return [
             entity_id
             for entity_id in (
+                self.global_config.smart_mode_entity,
                 self.controller.night_entity,
                 self.controller.detector_sensor_1,
                 self.controller.detector_sensor_2,
@@ -141,6 +142,9 @@ class ControllerRuntime:
         """Handle main-entity state transitions."""
         new_state = event.data.get("new_state")
         if new_state is None:
+            return
+
+        if not self._is_smart_mode_enabled():
             return
 
         if new_state.state == STATE_ON:
@@ -167,6 +171,10 @@ class ControllerRuntime:
         if new_state is None:
             return
 
+        if entity_id == self.global_config.smart_mode_entity:
+            await self._async_handle_smart_mode_event(new_state)
+            return
+
         if entity_id in {
             self.controller.detector_sensor_1,
             self.controller.detector_sensor_2,
@@ -175,6 +183,9 @@ class ControllerRuntime:
             return
 
         if entity_id != self.controller.night_entity:
+            return
+
+        if not self._is_smart_mode_enabled():
             return
 
         if new_state.state == STATE_ON:
@@ -217,6 +228,11 @@ class ControllerRuntime:
             and await self._async_all_detectors_are_clear()
         ):
             await self._async_turn_off_controlled_entities()
+            await self._async_cancel_timer()
+
+    async def _async_handle_smart_mode_event(self, new_state: State) -> None:
+        """Stop automation timing when smart mode is disabled."""
+        if new_state.state != STATE_ON:
             await self._async_cancel_timer()
 
     def _is_smart_mode_enabled(self) -> bool:

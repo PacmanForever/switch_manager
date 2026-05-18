@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+- Stopped controller automation completely while `smart_mode_entity` is off, so manual light changes no longer restart timers or cause automatic shutoff until smart mode is enabled again.
+
 ## 0.3.0
 
 - Renamed the Home Assistant integration domain and package from `switch_manager` to `switchflow_controller` so the repository name, manifest domain, services, and install path are aligned.

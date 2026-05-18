@@ -477,7 +477,12 @@ async def test_entity_helpers_cover_service_calls_and_detector_state_checks(hass
     hass.states.async_set("input_number.threshold", "15")
     hass.states.async_set("binary_sensor.smart", "unknown")
 
-    assert runtime._configured_listener_entities() == ["light.night", "binary_sensor.motion1", "binary_sensor.motion2"]
+    assert runtime._configured_listener_entities() == [
+        "binary_sensor.smart",
+        "light.night",
+        "binary_sensor.motion1",
+        "binary_sensor.motion2",
+    ]
     assert await runtime._async_all_detectors_are_clear() is False
     hass.states.async_set("binary_sensor.motion2", "off")
     assert await runtime._async_all_detectors_are_clear() is True
